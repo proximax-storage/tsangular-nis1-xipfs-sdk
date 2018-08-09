@@ -24,5 +24,5 @@ TBA
 
 ## 4. Developer Guide
 
-- [Install & Setup] (docs/install-and-setup.md)
-- [Reference documentation] (docs/reference-documentation.md)
+- [Install & Setup](docs/install-and-setup.md)
+- [Reference documentation](docs/reference-documentation.md)
