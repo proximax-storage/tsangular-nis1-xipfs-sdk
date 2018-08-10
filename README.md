@@ -30,6 +30,10 @@ TBA
 4\. Developer Guide
 -------------------
 
+### Get your XPX Test Tokens
+
+*   Visit the XEM/XPX Testnet faucet at [https://proximaxfaucet20180730014353.azurewebsites.net/](https://proximaxfaucet20180730014353.azurewebsites.net/ "Testnet Faucet")
+
 *   [Install & Setup](docs/install-and-setup.md)
 
 
