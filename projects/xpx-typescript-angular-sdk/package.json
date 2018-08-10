@@ -1,0 +1,22 @@
+{
+  "name": "xpx-typescript-angular-sdk",
+  "version": "0.0.12",
+  "peerDependencies": {
+    "@angular/common": "^6.0.3",
+    "@angular/core": "^6.0.3",
+    "flatbuffers": "1.9.0",
+    "typescript-base64-arraybuffer": "^0.1.0",
+    "rxjs": "^6.0.0",
+    "secrets.js-grempe": "^1.1.0",
+    "text-encoding-utf-8": "^1.0.2",
+    "nem-sdk": "^1.6.7",
+    "crypto-js": "^3.1.9-1",
+    "fast-sha256": "^1.1.0"
+  },
+  "devDependencies": {
+    "@types/flatbuffers": "^1.9.0",
+    "@types/text-encoding-utf-8": "^1.0.1",
+    "@types/node": "^8.10.24",
+    "@types/crypto-js": "^3.1.43"
+  }
+}
