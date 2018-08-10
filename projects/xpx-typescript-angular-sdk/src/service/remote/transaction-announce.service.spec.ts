@@ -63,8 +63,9 @@ describe('RemoteTransactionAnnounceServiceTest', () => {
                 id: -104,
                 prefix: '68',
                 char: 'T',
-                networkAddress: 'http://23.228.67.85',
-                networkPort: 7890
+                networkAddress: '23.228.67.85',
+                networkPort: 7890,
+                nemNetworkProtocol:'http'
             }
             const data = 'This is a message data';
 

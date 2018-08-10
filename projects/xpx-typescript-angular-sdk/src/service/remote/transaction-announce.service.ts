@@ -6,7 +6,6 @@ import { Observable, Observer } from 'rxjs';
 import { switchMap, map } from 'rxjs/operators';
 import { RemoteNodeService } from './node.service';
 import { NemAnnounceResult } from '../../model/nem-announce-resource';
-import { MessageType } from 'xpx-typescript-angular-sdk/public_api';
 import { Network } from '../../model/network';
 const nem = require('nem-sdk').default;
 
@@ -82,6 +81,13 @@ export class RemoteTransactionAnnounceService extends HttpService {
         );
     }
 
+    /**
+     * 
+     * @param data 
+     * @param pvKey 
+     * @param pubKey 
+     * @param network 
+     */
     public generateSignedTransaction(data: any, pvKey: string, pubKey: string, network?: Network): Promise<SignedTransaction> {
 
 
@@ -150,17 +156,17 @@ export class RemoteTransactionAnnounceService extends HttpService {
         transferTransaction.mosaics.push(xpxMosaicAttachment);
 
         // get the definition
-        const endpoint =  nem.model.objects.create("endpoint")(network.networkAddress, network.networkPort);
+        const endpoint = nem.model.objects.create("endpoint")(network.nemNetworkProtocol + '://' + network.networkAddress, network.networkPort);
 
-       return  nem.com.requests.namespace.mosaicDefinitions(endpoint, xpxMosaicAttachment.mosaicId.namespaceId).then(response => {    
+        return nem.com.requests.namespace.mosaicDefinitions(endpoint, xpxMosaicAttachment.mosaicId.namespaceId).then(response => {
             console.log(response.data);
             var neededDefinition = nem.utils.helpers.searchMosaicDefinitionArray(response.data, ["xpx"]);
-                
+
             // Get full name of mosaic to use as object key
-            var fullMosaicName  = nem.utils.format.mosaicIdToName(xpxMosaicAttachment.mosaicId);
+            var fullMosaicName = nem.utils.format.mosaicIdToName(xpxMosaicAttachment.mosaicId);
 
             // Check if the mosaic was found
-            if(undefined === neededDefinition[fullMosaicName]) return console.error("Mosaic not found !");
+            if (undefined === neededDefinition[fullMosaicName]) return console.error("Mosaic not found !");
 
             // Set eur mosaic definition into mosaicDefinitionMetaDataPair
             mosaicDefinitionMetaDataPair[fullMosaicName] = {};

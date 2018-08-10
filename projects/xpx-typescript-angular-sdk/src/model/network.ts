@@ -27,20 +27,25 @@ export interface Network {
     /**
      * The network prefix
      */
-    prefix: string;
+    prefix?: string;
 
     /**
      * The network character
      */
-    char: string;
+    char?: string;
 
     /**
      * The network endpoint
      */
-    networkAddress: string;
+    networkAddress?: string;
 
     /**
      * The network port
      */
-    networkPort: number;
+    networkPort?: number;
+
+    /**
+     * The nem network protocol
+     */
+    nemNetworkProtocol?: string,
 }

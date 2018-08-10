@@ -68,4 +68,9 @@ export interface NodeInfo {
      * The synchronised gateways
      */
     syncGateways?: string[];
+
+    /**
+     * The nem network protocol
+     */
+    nemNetworkProtocol?:string;
 }
