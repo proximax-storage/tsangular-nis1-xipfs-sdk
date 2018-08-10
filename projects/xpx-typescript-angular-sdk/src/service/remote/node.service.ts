@@ -6,6 +6,8 @@ import { NodeInfo } from '../../model/node-info';
 import { NodePeer } from '../../model/node-peer';
 import { GenericResponseMessage } from '../../model/generic-response-message';
 import { CustomHttpEncoder } from '../../model/custom-http-encoder';
+import { Network } from '../../model/network';
+import { map } from 'rxjs/operators';
 
 /**
  * Copyright 2018 ProximaX Limited
@@ -127,6 +129,50 @@ export class RemoteNodeService extends HttpService {
             observe: observe,
             reportProgress: true
         });
+
+    }
+
+    public getNetworkInfo(): Observable<Network> {
+        return this.getNodeInfo().pipe(
+            map(response => {
+
+                const nodeInfo: NodeInfo = response.body;
+
+                let networkId = null;
+                let networkPrefix = null;
+                let networkChar = null;
+
+                switch (nodeInfo.network.toLowerCase()) {
+                    case 'testnet':
+                        networkId = -104;
+                        networkPrefix = '98';
+                        networkChar = 'T';
+                        break;
+
+                    case 'mainnet':
+                        networkId = 104;
+                        networkPrefix = '68';
+                        networkChar = 'N';
+                        break;
+
+                    case 'mijin':
+                        networkId = 96;
+                        networkPrefix = '60';
+                        networkChar = 'M';
+                        break;
+                }
+
+                let network: Network = {
+                    id: networkId,
+                    prefix: networkPrefix,
+                    char: networkChar,
+                    networkAddress: nodeInfo.networkAddress,
+                    networkPort: nodeInfo.networkPort
+                };
+
+                return network;
+            })
+        );
 
     }
 

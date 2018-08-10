@@ -1,11 +1,14 @@
 import { HttpService } from '../http.service';
-import { Injectable } from '@angular/core';
+import { Injectable, SimpleChange } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { SignedTransaction } from '../../model/signed-transaction';
-import { Observable } from 'rxjs';
+import { Observable, Observer } from 'rxjs';
 import { switchMap, map } from 'rxjs/operators';
 import { RemoteNodeService } from './node.service';
 import { NemAnnounceResult } from '../../model/nem-announce-resource';
+import { MessageType } from 'xpx-typescript-angular-sdk/public_api';
+import { Network } from '../../model/network';
+const nem = require('nem-sdk').default;
 
 /**
  * Copyright 2018 ProximaX Limited
@@ -77,6 +80,107 @@ export class RemoteTransactionAnnounceService extends HttpService {
                 });
             })
         );
+    }
+
+    public generateSignedTransaction(data: any, pvKey: string, pubKey: string, network?: Network): Promise<SignedTransaction> {
+
+
+        let signedTransaction: SignedTransaction = {
+            data: '',
+            signature: ''
+        };
+
+        if (data === null) {
+            throw new Error('The data could not be null');
+        }
+
+        if (pvKey === null || pvKey === undefined) {
+            throw new Error('The sender private key could not be null');
+        }
+
+        if (pubKey === null || pubKey === undefined) {
+            throw new Error('The reciever public key could not be null');
+        }
+
+
+        // get empty unprepared transfer object
+        let transferTransaction = nem.model.objects.get("transferTransaction");
+
+        // Get a mosaicDefinitionMetaDataPair object with preloaded xem definition
+        let mosaicDefinitionMetaDataPair = nem.model.objects.get("mosaicDefinitionMetaDataPair");
+
+        // get common object to hold pass and key
+        let common = nem.model.objects.get("common");
+
+
+        if (!nem.utils.helpers.isPrivateKeyValid(pvKey)) {
+            throw new Error('Invalid private key, the private key must be in hexadecimal');
+        }
+
+        if (!nem.utils.helpers.isPublicKeyValid(pubKey)) {
+            throw new Error('Invalid private key, the private key must be in hexadecimal');
+        }
+
+        // assign private key
+        common.privateKey = pvKey;
+
+        // create keypair from the private key
+        let senderKp = nem.crypto.keyPair.create(nem.utils.helpers.fixPrivateKey(common.privateKey));
+
+        // create address from recipient public key
+        const recipientAddress = nem.model.address.toAddress(pubKey, network.id)
+
+        // attach message to transaction
+        transferTransaction.message = data;
+
+        // attach recipient to transaction
+        transferTransaction.recipient = recipientAddress;
+
+
+        // Create a Nem mosaic attachment object
+        var nemMosaicAttachment = nem.model.objects.create("mosaicAttachment")("nem", "xem", 1);
+
+        // Push attachment into transaction mosaics
+        transferTransaction.mosaics.push(nemMosaicAttachment);
+
+        // Create a XPX mosaic attachment object
+        var xpxMosaicAttachment = nem.model.objects.create("mosaicAttachment")("prx", "xpx", 1);
+
+        // Push attachment into transaction mosaics
+        transferTransaction.mosaics.push(xpxMosaicAttachment);
+
+        // get the definition
+        const endpoint =  nem.model.objects.create("endpoint")(network.networkAddress, network.networkPort);
+
+       return  nem.com.requests.namespace.mosaicDefinitions(endpoint, xpxMosaicAttachment.mosaicId.namespaceId).then(response => {    
+            console.log(response.data);
+            var neededDefinition = nem.utils.helpers.searchMosaicDefinitionArray(response.data, ["xpx"]);
+                
+            // Get full name of mosaic to use as object key
+            var fullMosaicName  = nem.utils.format.mosaicIdToName(xpxMosaicAttachment.mosaicId);
+
+            // Check if the mosaic was found
+            if(undefined === neededDefinition[fullMosaicName]) return console.error("Mosaic not found !");
+
+            // Set eur mosaic definition into mosaicDefinitionMetaDataPair
+            mosaicDefinitionMetaDataPair[fullMosaicName] = {};
+            mosaicDefinitionMetaDataPair[fullMosaicName].mosaicDefinition = neededDefinition[fullMosaicName];
+
+            // Prepare the updated transfer transaction object
+            const transactionEntity = nem.model.transactions.prepare("mosaicTransferTransaction")(common, transferTransaction, mosaicDefinitionMetaDataPair, network.id);
+
+            // Serialize the transaction
+            const serialized = nem.utils.serialization.serializeTransaction(transactionEntity);
+
+            // Sign the serialized transaction with keypair object
+            const signature = senderKp.sign(serialized);
+
+            signedTransaction.data = nem.utils.convert.ua2hex(serialized);
+            signedTransaction.signature = signature.toString();
+
+            return signedTransaction;
+        });
+
     }
 
     /**

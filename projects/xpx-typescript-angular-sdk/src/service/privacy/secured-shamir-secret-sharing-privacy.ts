@@ -2,7 +2,7 @@ import { TextEncoder, TextDecoder } from 'text-encoding-utf-8';
 import { SecuredCipher } from './secured-cipher';
 import { Observable } from 'rxjs';
 import 'rxjs/add/observable/fromPromise';
-const crypto = require('secrets.js-grempe').default;
+const crypto = require('secrets.js-grempe');
 
 /**
  * Copyright 2018 ProximaX Limited

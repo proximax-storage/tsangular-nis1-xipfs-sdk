@@ -1,6 +1,6 @@
 {
   "name": "xpx-typescript-angular-sdk",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "peerDependencies": {
     "@angular/common": "^6.0.3",
     "@angular/core": "^6.0.3",

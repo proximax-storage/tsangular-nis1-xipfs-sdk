@@ -1,3 +1,4 @@
+
 /*
  * Copyright 2018 ProximaX Limited
  *
@@ -14,58 +15,32 @@
  * limitations under the License.
  */
 
-/**
- * Interface represents node info
- */
-export interface NodeInfo {
-    /**
-     * The context Uri
-     */
-    contextUri?: string;
-
-    /**
-     * The Nem address
-     */
-    nemAddress?: string;
-
-    /**
-     * The network name
-     */
-    network?: string;
-
+ /**
+  * Interface represents the network info
+  */
+export interface Network {
     /**
      * The network id
      */
-    networkId?: number;
-
+    id?: number;
 
     /**
-     * The network address
+     * The network prefix
      */
-    networkAddress?: string;
+    prefix: string;
+
+    /**
+     * The network character
+     */
+    char: string;
+
+    /**
+     * The network endpoint
+     */
+    networkAddress: string;
 
     /**
      * The network port
      */
-    networkPort?: number;
-
-    /**
-     * The network namespace
-     */
-    namespace?: string;
-
-    /**
-     * The Nem mosaic
-     */
-    mosaic?: string;
-
-    /**
-     * The peer id
-     */
-    peerId?: string;
-
-    /**
-     * The synchronised gateways
-     */
-    syncGateways?: string[];
+    networkPort: number;
 }

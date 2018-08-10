@@ -3,10 +3,12 @@
  */
 export * from './service/http.service';
 export * from './service/remote/account.service';
+export * from './service/remote/datahash.service';
 export * from './service/remote/upload.service';
 export * from './service/remote/download.service';
 export * from './service/remote/transaction-announce.service';
 export * from './service/remote/node.service';
+export * from './service/remote/search.service';
 export * from './service/privacy/secured-cipher';
 export * from './service/privacy/secured-nem-key-privacy';
 export * from './service/privacy/secured-password-privacy';
@@ -25,6 +27,12 @@ export * from './model/nem-announce-resource';
 export * from './model/account-info';
 export * from './model/account-meta-data';
 export * from './model/account-meta-data-pair';
+export * from './model/account-status';
+export * from './model/address';
+export * from './model/block-amount';
+export * from './model/key-pair';
+export * from './model/private_key';
+export * from './model/public-key';
 export * from './model/multisig-info';
 
 
