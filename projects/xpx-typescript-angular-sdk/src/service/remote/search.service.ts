@@ -1,9 +1,9 @@
-import { Injectable } from '@angular/core';
-import { HttpService } from '../http.service';
+import { Injectable, Optional, Inject } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ResourceHashMessage } from '../../model/resource-hash-message';
 import { CustomHttpEncoder } from '../../model/custom-http-encoder';
+import { REMOTE_BASE_URL } from '../../model/constants';
 
 
 /**
@@ -28,20 +28,25 @@ import { CustomHttpEncoder } from '../../model/custom-http-encoder';
 @Injectable({
     providedIn: 'root'
 })
-export class RemoteSearchService extends HttpService {
+export class RemoteSearchService {
 
     /**
      * The default baseUrl
      */
     protected baseUrl = 'https://testnet2.gateway.proximax.io/';
 
+   
     /**
-     * NodeService constructor
-     * @param  http the http client instance
+     * RemoteSearchService Constructor
+     * @param http the HttpClient instance
+     * @param baseUrl the optional baseUrl
      */
-    constructor(http: HttpClient) {
-        super(http);
+    constructor(private http: HttpClient, @Optional() @Inject(REMOTE_BASE_URL) baseUrl: string) {
+        if (baseUrl) {
+            this.baseUrl = baseUrl;
+        }
     }
+
 
     /**
      * Search files in IPFS network by keywords

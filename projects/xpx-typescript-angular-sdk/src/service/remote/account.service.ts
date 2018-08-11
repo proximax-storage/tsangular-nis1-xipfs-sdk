@@ -1,8 +1,8 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Optional, Inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { HttpService } from '../http.service';
 import { Observable } from 'rxjs';
 import { AccountMetaDataPair } from '../../model/account-meta-data-pair';
+import { REMOTE_BASE_URL } from '../../model/constants';
 
 /**
  * Copyright 2018 ProximaX Limited
@@ -26,7 +26,7 @@ import { AccountMetaDataPair } from '../../model/account-meta-data-pair';
 @Injectable({
     providedIn: 'root'
 })
-export class RemoteAccountService extends HttpService {
+export class RemoteAccountService {
 
     /**
      * The default baseURl
@@ -35,10 +35,13 @@ export class RemoteAccountService extends HttpService {
 
     /**
      * RemoteAccountService constructor
-     * @param http the http client instance
+     * @param http the HttpClient instance
+     * @param baseUrl the optional baseUrl
      */
-    constructor(http: HttpClient) {
-        super(http);
+    constructor(private http: HttpClient, @Optional() @Inject(REMOTE_BASE_URL) baseUrl: string) {
+        if (baseUrl) {
+            this.baseUrl = baseUrl;
+        }
     }
 
     /**

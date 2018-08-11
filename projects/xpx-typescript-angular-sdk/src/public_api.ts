@@ -1,7 +1,7 @@
 /*
  * Public API Surface of angular-xpx-lib
  */
-export * from './service/http.service';
+
 export * from './service/remote/account.service';
 export * from './service/remote/datahash.service';
 export * from './service/remote/upload.service';
@@ -34,6 +34,8 @@ export * from './model/key-pair';
 export * from './model/private_key';
 export * from './model/public-key';
 export * from './model/multisig-info';
+export * from './model/constants';
+export * from './utils/helpers';
 
 
 

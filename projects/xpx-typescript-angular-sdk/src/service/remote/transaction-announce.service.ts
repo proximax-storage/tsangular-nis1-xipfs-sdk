@@ -1,5 +1,4 @@
-import { HttpService } from '../http.service';
-import { Injectable, SimpleChange } from '@angular/core';
+import { Injectable, SimpleChange, Optional, Inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { SignedTransaction } from '../../model/signed-transaction';
 import { Observable, Observer } from 'rxjs';
@@ -7,6 +6,7 @@ import { switchMap, map } from 'rxjs/operators';
 import { RemoteNodeService } from './node.service';
 import { NemAnnounceResult } from '../../model/nem-announce-resource';
 import { Network } from '../../model/network';
+import { REMOTE_BASE_URL } from '../../model/constants';
 const nem = require('nem-sdk').default;
 
 /**
@@ -31,7 +31,7 @@ const nem = require('nem-sdk').default;
 @Injectable({
     providedIn: 'root'
 })
-export class RemoteTransactionAnnounceService extends HttpService {
+export class RemoteTransactionAnnounceService {
 
     /**
      * The default baseUrl
@@ -39,11 +39,14 @@ export class RemoteTransactionAnnounceService extends HttpService {
     protected baseUrl = 'https://testnet2.gateway.proximax.io/';
 
     /**
-     * RemoteTransactionAnnounceService constructor
-     * @param  http the http client instance
-     */
-    constructor(http: HttpClient) {
-        super(http);
+    * RemoteTransactionAnnounceService Constructor
+    * @param http the HttpClient instance
+    * @param baseUrl the optional baseUrl
+    */
+    constructor(private http: HttpClient, @Optional() @Inject(REMOTE_BASE_URL) baseUrl: string) {
+        if (baseUrl) {
+            this.baseUrl = baseUrl;
+        }
     }
 
     /**
@@ -58,7 +61,7 @@ export class RemoteTransactionAnnounceService extends HttpService {
         }
 
         // get node info and announce to NEM network
-        const nodeService = new RemoteNodeService(this.http);
+        const nodeService = new RemoteNodeService(this.http, this.baseUrl);
 
         return nodeService.getNodeInfo().pipe(
             switchMap(node => {

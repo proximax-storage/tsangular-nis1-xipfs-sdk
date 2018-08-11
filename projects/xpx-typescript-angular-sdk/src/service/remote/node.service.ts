@@ -1,5 +1,4 @@
-import { HttpService } from '../http.service';
-import { Injectable } from '@angular/core';
+import { Injectable, Optional, Inject } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { NodeInfo } from '../../model/node-info';
@@ -8,6 +7,7 @@ import { GenericResponseMessage } from '../../model/generic-response-message';
 import { CustomHttpEncoder } from '../../model/custom-http-encoder';
 import { Network } from '../../model/network';
 import { map } from 'rxjs/operators';
+import { REMOTE_BASE_URL } from '../../model/constants';
 
 /**
  * Copyright 2018 ProximaX Limited
@@ -31,19 +31,22 @@ import { map } from 'rxjs/operators';
 @Injectable({
     providedIn: 'root'
 })
-export class RemoteNodeService extends HttpService {
+export class RemoteNodeService {
 
     /**
      * The default baseUrl
      */
-    protected baseUrl = 'https://testnet2.gateway.proximax.io/';
+    private baseUrl = 'https://testnet2.gateway.proximax.io/';
 
     /**
-     * NodeService constructor
-     * @param  http the http client instance
+     * RemoteNodeService Constructor
+     * @param http the HttpClient instance
+     * @param baseUrl the optional baseUrl
      */
-    constructor(http: HttpClient) {
-        super(http);
+    constructor(private http: HttpClient, @Optional() @Inject(REMOTE_BASE_URL) baseUrl: string) {
+        if (baseUrl) {
+            this.baseUrl = baseUrl;
+        }
     }
 
 
@@ -59,7 +62,7 @@ export class RemoteNodeService extends HttpService {
      */
     public checkNode(): Observable<any> {
         const endpoint = this.baseUrl + 'node/check';
-
+        console.log(endpoint);
         // request headers
         const headers = new HttpHeaders({
             'Accept': 'application/json'
@@ -167,7 +170,8 @@ export class RemoteNodeService extends HttpService {
                     prefix: networkPrefix,
                     char: networkChar,
                     networkAddress: nodeInfo.networkAddress,
-                    networkPort: nodeInfo.networkPort
+                    networkPort: nodeInfo.networkPort,
+                    nemNetworkProtocol: nodeInfo.nemNetworkProtocol,
                 };
 
                 return network;

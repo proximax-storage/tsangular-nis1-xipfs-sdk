@@ -1,10 +1,10 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Optional, Inject } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { HttpService } from '../http.service';
 import { TransferMode } from '../../model/transfer-mode';
 import { Observable } from 'rxjs';
 import { CustomHttpEncoder } from '../../model/custom-http-encoder';
 import { GenericResponseMessage } from '../../model/generic-response-message';
+import { REMOTE_BASE_URL } from '../../model/constants';
 
 /*
 * Copyright 2018 ProximaX Limited
@@ -28,7 +28,7 @@ import { GenericResponseMessage } from '../../model/generic-response-message';
 @Injectable({
     providedIn: 'root'
 })
-export class RemoteDownloadService extends HttpService {
+export class RemoteDownloadService {
 
     /**
      * The default baseUrl
@@ -36,12 +36,16 @@ export class RemoteDownloadService extends HttpService {
     protected baseUrl = 'https://testnet2.gateway.proximax.io/';
 
     /**
-     * RemoteDownloadService constructor
-     * @param  http the http client instance
-     */
-    constructor(http: HttpClient) {
-        super(http);
+    * RemoteDownloadService constructor
+    * @param http the HttpClient instance
+    * @param baseUrl the optional baseUrl
+    */
+    constructor(private http: HttpClient, @Optional() @Inject(REMOTE_BASE_URL) baseUrl: string) {
+        if (baseUrl) {
+            this.baseUrl = baseUrl;
+        }
     }
+
 
     /**
      * Download the binary file associated to a NEM Hash.
@@ -346,17 +350,17 @@ export class RemoteDownloadService extends HttpService {
 
         // create url path based on the endpoint
         const path = endpoint + '/' + encodeURIComponent(dataHash);
-       // let queryParams = new HttpParams({ encoder: new CustomHttpEncoder() });
-       // if (dataHash !== null) {
-       //     queryParams = queryParams.set('dataHash', dataHash);
-       // }
+        // let queryParams = new HttpParams({ encoder: new CustomHttpEncoder() });
+        // if (dataHash !== null) {
+        //     queryParams = queryParams.set('dataHash', dataHash);
+        // }
 
         // console.log(queryParams);
 
         return this.http.get(path, {
             responseType: responseType,
             headers: headers,
-        //    params: queryParams,
+            //    params: queryParams,
             observe: observe,
             reportProgress: true
         });

@@ -1,7 +1,7 @@
-import { Injectable } from '@angular/core';
-import { HttpService } from '../http.service';
+import { Injectable, Optional, Inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { REMOTE_BASE_URL } from '../../model/constants';
 
 /**
  * Copyright 2018 ProximaX Limited
@@ -25,7 +25,7 @@ import { Observable } from 'rxjs';
 @Injectable({
     providedIn: 'root'
 })
-export class RemoteDataHashService extends HttpService {
+export class RemoteDataHashService {
 
     /**
      * The default baseUrl
@@ -34,10 +34,13 @@ export class RemoteDataHashService extends HttpService {
 
     /**
      * RemoteDataHashService constructor
-     * @param http  the http client instance
+     * @param http the HttpClient instance
+     * @param baseUrl the optional baseUrl
      */
-    constructor(http: HttpClient) {
-        super(http);
+    constructor(private http: HttpClient, @Optional() @Inject(REMOTE_BASE_URL) baseUrl: string) {
+        if (baseUrl) {
+            this.baseUrl = baseUrl;
+        }
     }
 
     /**

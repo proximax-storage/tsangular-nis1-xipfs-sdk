@@ -3,6 +3,7 @@ import { TestBed, inject, async } from '@angular/core/testing';
 import { HttpClientModule } from '@angular/common/http';
 import { RemoteNodeService } from './node.service';
 import { GenericResponseMessage } from '../../model/generic-response-message';
+import { REMOTE_BASE_URL } from '../../model/constants';
 
 
 /**
@@ -25,7 +26,8 @@ describe('RemoteNodeServiceTest', () => {
     beforeEach(() => {
         TestBed.configureTestingModule({
             imports: [HttpClientModule],
-            providers: [RemoteNodeService]
+            providers: [RemoteNodeService,
+                { provide: REMOTE_BASE_URL, useValue: "http://example.com/api" }]
         });
     });
 
@@ -87,7 +89,7 @@ describe('RemoteNodeServiceTest', () => {
             const domain = 'proximax.io';
             const port = '2455';
             service.setBlockchainConnection(network, domain, port).subscribe((response) => {
-               console.log(response);
+                console.log(response);
                 expect(response.status).toEqual(202);
 
                 const message = response.body;

@@ -1,17 +1,18 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Optional, Inject } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { map, catchError } from 'rxjs/operators';
 import { UploadTextRequest } from '../../model/upload-text-request';
 import { ResourceHashMessage } from '../../model/resource-hash-message';
 import { flatbuffers } from 'flatbuffers';
 import { decode, encode } from 'typescript-base64-arraybuffer';
-import { HttpService } from '../http.service';
 import { Observable } from 'rxjs';
 import { UploadBinaryRequest } from '../../model/upload-binary-request';
 import { GenericResponseMessage } from '../../model/generic-response-message';
 import { MessageType } from '../../model/message-type';
 import { CustomHttpEncoder } from '../../model/custom-http-encoder';
 import { SignedTransaction } from '../../model/signed-transaction';
+import { REMOTE_BASE_URL } from '../../model/constants';
+import { Helpers } from '../../utils/helpers';
 
 /**
  * Copyright 2018 ProximaX Limited
@@ -35,18 +36,22 @@ import { SignedTransaction } from '../../model/signed-transaction';
 @Injectable({
   providedIn: 'root'
 })
-export class RemoteUploadService extends HttpService {
+export class RemoteUploadService {
 
   // the default baseUrl
   protected baseUrl = 'https://testnet2.gateway.proximax.io/';
 
   /**
-   * RemoteUploadService constructor
-   * @param http the http client instance
-   */
-  constructor(http: HttpClient) {
-    super(http);
+  * RemoteUploadService Constructor
+  * @param http the HttpClient instance
+  * @param baseUrl the optional baseUrl
+  */
+  constructor(private http: HttpClient, @Optional() @Inject(REMOTE_BASE_URL) baseUrl: string) {
+    if (baseUrl) {
+      this.baseUrl = baseUrl;
+    }
   }
+
 
   /**
    * Uploads text to IPFS network
@@ -67,7 +72,7 @@ export class RemoteUploadService extends HttpService {
       throw new Error('The request payload could not be null');
     } else if (payload.text === null || payload.text === undefined || payload.text === '') {
       throw new Error('The request payload \'text\' field is required');
-    } else if (!this.isJSONString(payload.metadata)) {
+    } else if (!Helpers.isJSONString(payload.metadata)) {
       throw new Error('The request payload \'metadata\' field must be a valid JSON');
     }
 
@@ -113,7 +118,7 @@ export class RemoteUploadService extends HttpService {
         // return the resource hash from IPFS network
         return resourceHash;
       }),
-      catchError(this.handleError));
+      catchError(Helpers.handleError));
   }
 
   /**
@@ -135,7 +140,7 @@ export class RemoteUploadService extends HttpService {
       throw new Error('The request payload could not be null');
     } else if (payload.data === null) {
       throw new Error('The request payload \'data\' field is required');
-    } else if (!this.isJSONString(payload.metadata)) {
+    } else if (!Helpers.isJSONString(payload.metadata)) {
       throw new Error('The request payload \'metadata\' field must be a valid JSON');
     }
 
@@ -176,7 +181,7 @@ export class RemoteUploadService extends HttpService {
         return resourceHash;
       })
       ,
-      catchError(this.handleError));
+      catchError(Helpers.handleError));
   }
 
   /**
@@ -198,7 +203,7 @@ export class RemoteUploadService extends HttpService {
       throw new Error('The request payload could not be null');
     } else if (payload.data === null) {
       throw new Error('The request payload \'data\' field is required');
-    } else if (!this.isJSONString(payload.metadata)) {
+    } else if (!Helpers.isJSONString(payload.metadata)) {
       throw new Error('The request payload \'metadata\' field must be a valid JSON');
     }
 
@@ -239,7 +244,7 @@ export class RemoteUploadService extends HttpService {
         return resourceHash;
       })
       ,
-      catchError(this.handleError));
+      catchError(Helpers.handleError));
   }
 
   /**
@@ -276,7 +281,7 @@ export class RemoteUploadService extends HttpService {
       throw new Error('The request payload could not be null');
     } else if (payload.data === null) {
       throw new Error('The request payload \'data\' field is required');
-    } else if (!this.isJSONString(payload.metadata)) {
+    } else if (!Helpers.isJSONString(payload.metadata)) {
       throw new Error('The request payload \'metadata\' field must be a valid JSON');
     }
 

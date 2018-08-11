@@ -1,3 +1,6 @@
+import { HttpErrorResponse } from '@angular/common/http';
+import { throwError } from 'rxjs';
+
 /*
  * Copyright 2018 ProximaX Limited
  *
@@ -14,48 +17,14 @@
  * limitations under the License.
  */
 
-
-import { Injectable } from '@angular/core';
-import { HttpErrorResponse, HttpClient } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-
-
-
-/**
- * Abstract class represents the HttpService
- */
-@Injectable({
-    providedIn: 'root'
-})
-export abstract class HttpService {
-
-    /**
-     * The baseUrl
-     */
-    protected abstract baseUrl: string;
-
-    /**
-     * HttpService constructor
-     * @param http the http client instance
-     */
-    constructor(protected http: HttpClient) {
-
-    }
-
-    /**
-     * Sets base url
-     * @param baseUrl the base url
-     */
-    public setBaseUrl(baseUrl: string) {
-        this.baseUrl = baseUrl;
-    }
+export class Helpers {
 
 
     /**
      * Handles common error
      * @param error the error
      */
-    protected handleError(error: HttpErrorResponse) {
+    public static handleError(error: HttpErrorResponse) {
         if (error.error instanceof ErrorEvent) {
             // A client-side or network error occurred. Handle it accordingly.
             console.error('An error occurred:', error.error.message);
@@ -76,7 +45,7 @@ export abstract class HttpService {
      * Checks the input string is in JSON format
      * @param str the input string
      */
-    protected isJSONString(str: string) {
+    public static isJSONString(str: string) {
         if (str === null || str === undefined || str.length === 0) {
             return true;
         }
@@ -89,5 +58,4 @@ export abstract class HttpService {
 
         return true;
     }
-
 }
