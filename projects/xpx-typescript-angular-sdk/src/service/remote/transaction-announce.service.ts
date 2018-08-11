@@ -6,7 +6,7 @@ import { switchMap, map } from 'rxjs/operators';
 import { RemoteNodeService } from './node.service';
 import { NemAnnounceResult } from '../../model/nem-announce-resource';
 import { Network } from '../../model/network';
-import { REMOTE_BASE_URL } from '../../model/constants';
+import { PROXIMAX_REMOTE_BASE_URL } from '../../model/constants';
 const nem = require('nem-sdk').default;
 
 /**
@@ -36,14 +36,14 @@ export class RemoteTransactionAnnounceService {
     /**
      * The default baseUrl
      */
-    protected baseUrl = 'https://testnet2.gateway.proximax.io/';
+    private baseUrl = 'https://testnet2.gateway.proximax.io/';
 
     /**
     * RemoteTransactionAnnounceService Constructor
     * @param http the HttpClient instance
     * @param baseUrl the optional baseUrl
     */
-    constructor(private http: HttpClient, @Optional() @Inject(REMOTE_BASE_URL) baseUrl: string) {
+    constructor(private http: HttpClient, @Optional() @Inject(PROXIMAX_REMOTE_BASE_URL) baseUrl: string) {
         if (baseUrl) {
             this.baseUrl = baseUrl;
         }
@@ -153,7 +153,7 @@ export class RemoteTransactionAnnounceService {
         transferTransaction.mosaics.push(nemMosaicAttachment);
 
         // Create a XPX mosaic attachment object
-        var xpxMosaicAttachment = nem.model.objects.create("mosaicAttachment")("prx", "xpx", 1);
+        var xpxMosaicAttachment = nem.model.objects.create("mosaicAttachment")("prx", "xpx", 1/10000);
 
         // Push attachment into transaction mosaics
         transferTransaction.mosaics.push(xpxMosaicAttachment);

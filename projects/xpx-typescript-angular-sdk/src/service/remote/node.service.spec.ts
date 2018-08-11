@@ -3,7 +3,7 @@ import { TestBed, inject, async } from '@angular/core/testing';
 import { HttpClientModule } from '@angular/common/http';
 import { RemoteNodeService } from './node.service';
 import { GenericResponseMessage } from '../../model/generic-response-message';
-import { REMOTE_BASE_URL } from '../../model/constants';
+import { PROXIMAX_REMOTE_BASE_URL } from '../../model/constants';
 
 
 /**
@@ -27,7 +27,7 @@ describe('RemoteNodeServiceTest', () => {
         TestBed.configureTestingModule({
             imports: [HttpClientModule],
             providers: [RemoteNodeService,
-                { provide: REMOTE_BASE_URL, useValue: "https://testnet2.gateway.proximax.io/" }]
+                { provide: PROXIMAX_REMOTE_BASE_URL, useValue: "https://testnet2.gateway.proximax.io/" }]
         });
     });
 

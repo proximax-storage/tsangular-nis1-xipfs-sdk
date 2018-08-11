@@ -7,7 +7,7 @@ import { GenericResponseMessage } from '../../model/generic-response-message';
 import { CustomHttpEncoder } from '../../model/custom-http-encoder';
 import { Network } from '../../model/network';
 import { map } from 'rxjs/operators';
-import { REMOTE_BASE_URL } from '../../model/constants';
+import { PROXIMAX_REMOTE_BASE_URL } from '../../model/constants';
 
 /**
  * Copyright 2018 ProximaX Limited
@@ -43,7 +43,7 @@ export class RemoteNodeService {
      * @param http the HttpClient instance
      * @param baseUrl the optional baseUrl
      */
-    constructor(private http: HttpClient, @Optional() @Inject(REMOTE_BASE_URL) baseUrl: string) {
+    constructor(private http: HttpClient, @Optional() @Inject(PROXIMAX_REMOTE_BASE_URL) baseUrl: string) {
         if (baseUrl) {
             this.baseUrl = baseUrl;
         }

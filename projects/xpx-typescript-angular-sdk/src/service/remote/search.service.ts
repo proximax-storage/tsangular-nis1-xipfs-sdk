@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ResourceHashMessage } from '../../model/resource-hash-message';
 import { CustomHttpEncoder } from '../../model/custom-http-encoder';
-import { REMOTE_BASE_URL } from '../../model/constants';
+import { PROXIMAX_REMOTE_BASE_URL } from '../../model/constants';
 
 
 /**
@@ -33,7 +33,7 @@ export class RemoteSearchService {
     /**
      * The default baseUrl
      */
-    protected baseUrl = 'https://testnet2.gateway.proximax.io/';
+    private baseUrl = 'https://testnet2.gateway.proximax.io/';
 
    
     /**
@@ -41,7 +41,7 @@ export class RemoteSearchService {
      * @param http the HttpClient instance
      * @param baseUrl the optional baseUrl
      */
-    constructor(private http: HttpClient, @Optional() @Inject(REMOTE_BASE_URL) baseUrl: string) {
+    constructor(private http: HttpClient, @Optional() @Inject(PROXIMAX_REMOTE_BASE_URL) baseUrl: string) {
         if (baseUrl) {
             this.baseUrl = baseUrl;
         }

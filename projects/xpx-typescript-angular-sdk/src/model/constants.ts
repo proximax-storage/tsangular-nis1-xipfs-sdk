@@ -19,4 +19,4 @@ import { InjectionToken } from '@angular/core';
 /**
  * The remote base url
  */
-export const REMOTE_BASE_URL = new InjectionToken('REMOTE_BASE_URL');
+export const PROXIMAX_REMOTE_BASE_URL = new InjectionToken('PROXIMAX_REMOTE_BASE_URL');

@@ -1,88 +1,101 @@
 
-Proximax P2P Storage Angular Typescript SDK (NIS1 Compatible Only)
+# Proximax P2P Storage Typescript SDK (NIS1 Compatible Only)
 ==================================================================
 
 ![banner](https://proximax.io/wp-content/uploads/2018/03/ProximaX-logotype.png)
 
 ProximaX is a project that utilizes the NEM blockchain technology with the IPFS P2P storage technology to form a very powerful proofing solution for documents or files which are stored in an immutable and irreversible manner, similar to the blockchain technology solutions.
 
-1\. Features
-------------
+# Getting started with ProximaX Typescript SDK (NIS1)
 
-*   Remote Account Transaction Service
-*   Remote Datahash Service
-*   Remote Search Service
-*   Remote Upload Service
-*   Remote Download Service
-*   Remote Announce Transaction
-*   Remote Node Info Service
+### 0. Get your XPX Test Tokens
 
-2\. Demo
---------
+Visit the XEM/XPX Testnet faucet at [https://proximaxfaucet20180730014353.azurewebsites.net/](https://proximaxfaucet20180730014353.azurewebsites.net/)
 
-TBA
+### 1. Setup your development environment
 
-3\. Installation
-----------------
+You need to set up your development environment before you can do anything.
 
-`npm install xpx-typescript-angular-sdk`
+Install [Node.js® and npm](https://nodejs.org/en/download/) if they are not already on your machine.
 
-4\. Developer Guide
--------------------
+xpx-typescript-angular-sdk is build with Typescript and Angular 6.x, please ensure that you have the latest version installed.
 
-*   [Install & Setup](docs/install-and-setup.md)
+```bash
+npm install -g typescript @angular/cli
+```
 
+### 2. Create a new project
 
-5\. Reference Guide
--------------------
+```bash
+ng new <project-name>
+cd <project-name>
+```
 
+The Angular CLI's `new` command will set up the latest Angular build in a new project structure.
 
-* ["model/account-info"](modules/_model_account_info_.md)
-* ["model/account-meta-data"](modules/_model_account_meta_data_.md)
-* ["model/account-meta-data-pair"](modules/_model_account_meta_data_pair_.md)
-* ["model/account-status"](modules/_model_account_status_.md)
-* ["model/address"](modules/_model_address_.md)
-* ["model/amount"](modules/_model_amount_.md)
-* ["model/block-amount"](modules/_model_block_amount_.md)
-* ["model/custom-http-encoder"](modules/_model_custom_http_encoder_.md)
-* ["model/generic-response-message"](modules/_model_generic_response_message_.md)
-* ["model/hash-data"](modules/_model_hash_data_.md)
-* ["model/key-pair"](modules/_model_key_pair_.md)
-* ["model/message-type"](modules/_model_message_type_.md)
-* ["model/multisig-info"](modules/_model_multisig_info_.md)
-* ["model/nem-announce-resource"](modules/_model_nem_announce_resource_.md)
-* ["model/node-info"](modules/_model_node_info_.md)
-* ["model/node-peer"](modules/_model_node_peer_.md)
-* ["model/private_key"](modules/_model_private_key_.md)
-* ["model/public-key"](modules/_model_public_key_.md)
-* ["model/remote-status"](modules/_model_remote_status_.md)
-* ["model/resource-hash-message"](modules/_model_resource_hash_message_.md)
-* ["model/signed-transaction"](modules/_model_signed_transaction_.md)
-* ["model/transfer-mode"](modules/_model_transfer_mode_.md)
-* ["model/upload-binary-request"](modules/_model_upload_binary_request_.md)
-* ["model/upload-text-request"](modules/_model_upload_text_request_.md)
-* ["service/http.service"](modules/_service_http_service_.md)
-* ["service/privacy/secured-cipher"](modules/_service_privacy_secured_cipher_.md)
-* ["service/privacy/secured-nem-key-privacy"](modules/_service_privacy_secured_nem_key_privacy_.md)
-* ["service/privacy/secured-nem-key-privacy.spec"](modules/_service_privacy_secured_nem_key_privacy_spec_.md)
-* ["service/privacy/secured-password-privacy"](modules/_service_privacy_secured_password_privacy_.md)
-* ["service/privacy/secured-password-privacy.spec"](modules/_service_privacy_secured_password_privacy_spec_.md)
-* ["service/privacy/secured-shamir-secret-sharing-privacy"](modules/_service_privacy_secured_shamir_secret_sharing_privacy_.md)
-* ["service/privacy/secured-shamir-secret-sharing-privacy.spec"](modules/_service_privacy_secured_shamir_secret_sharing_privacy_spec_.md)
-* ["service/remote/account.service"](modules/_service_remote_account_service_.md)
-* ["service/remote/account.service.spec"](modules/_service_remote_account_service_spec_.md)
-* ["service/remote/datahash.service"](modules/_service_remote_datahash_service_.md)
-* ["service/remote/datahash.service.spec"](modules/_service_remote_datahash_service_spec_.md)
-* ["service/remote/download.service"](modules/_service_remote_download_service_.md)
-* ["service/remote/download.service.spec"](modules/_service_remote_download_service_spec_.md)
-* ["service/remote/node.service"](modules/_service_remote_node_service_.md)
-* ["service/remote/node.service.spec"](modules/_service_remote_node_service_spec_.md)
-* ["service/remote/search.service"](modules/_service_remote_search_service_.md)
-* ["service/remote/search.service.spec"](modules/_service_remote_search_service_spec_.md)
-* ["service/remote/transaction-announce.service"](modules/_service_remote_transaction_announce_service_.md)
-* ["service/remote/transaction-announce.service.spec"](modules/_service_remote_transaction_announce_service_spec_.md)
-* ["service/remote/upload.service"](modules/_service_remote_upload_service_.md)
-* ["service/remote/upload.service.spec"](modules/_service_remote_upload_service_spec_.md)
+### 3. Test your project
 
----
+```bash
+ng serve
+open browser http://localhost:4200
+```
 
+You should see the Welcome to `<project-name>` page
+
+### 4. Install xpx-typescript-angular-sdk and its dependencies
+
+```bash
+npm install xpx-typescript-angular-sdk crypto-js fast-sha256 flatbuffers nem-sdk secrets.js-grempe text-encoding-utf-8 typescript-base64-arraybuffer --save
+```
+
+### 5. Add ProximaX connection configure to environments variable
+
+Open /src/environments/environment.ts and add your ProximaX configuration
+
+```ts
+export const environment = {
+  production: false,
+  ProximaX: {
+    remoteConnection: 'https://testnet.gateway.proximax.io',
+  }
+};
+```
+
+Aside from the testnet connection above, you can also use the following testnet gateways.
+
+[https://testnet1.gateway.proximax.io](https://testnet1.gateway.proximax.io)
+
+[https://testnet2.gateway.proximax.io](https://testnet2.gateway.proximax.io)
+
+[https://testnet3.gateway.proximax.io](https://testnet3.gateway.proximax.io)
+
+These testnet gateways are privately hosted storage contributor nodes on our ProximaX servers. 
+All of them are connected to NEM Testnet and Public IPFS network.
+
+We also have mainnet and mijinnet (NIS Mijin)
+
+[https://mainnet.gateway.proximax.io](https://mainnet.gateway.proximax.io)
+[https://mijin.gateway.proximax.io](https://mijin.gateway.proximax.io)
+
+### 6. Setup @NgModule for Proximax remote connection
+
+Open /src/app/app.module.ts, and specify your ProximaX connection configuration
+
+```ts
+import { BrowserModule } from '@angular/platform-browser';
+import { NgModule } from '@angular/core';
+import { AppComponent } from './app.component';
+import { environment } from '../environments/environment';
+
+@NgModule({
+  imports: [
+    BrowserModule
+  ],
+  declarations: [ AppComponent ],
+  bootstrap: [ AppComponent ],
+  providers: [ {provide: PROXIMAX_REMOTE_BASE_URL, useValue: environment.ProximaX.remoteConnection }]
+})
+export class AppModule {}
+```
+
+# Basic usages

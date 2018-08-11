@@ -11,7 +11,7 @@ import { GenericResponseMessage } from '../../model/generic-response-message';
 import { MessageType } from '../../model/message-type';
 import { CustomHttpEncoder } from '../../model/custom-http-encoder';
 import { SignedTransaction } from '../../model/signed-transaction';
-import { REMOTE_BASE_URL } from '../../model/constants';
+import { PROXIMAX_REMOTE_BASE_URL } from '../../model/constants';
 import { Helpers } from '../../utils/helpers';
 
 /**
@@ -46,7 +46,7 @@ export class RemoteUploadService {
   * @param http the HttpClient instance
   * @param baseUrl the optional baseUrl
   */
-  constructor(private http: HttpClient, @Optional() @Inject(REMOTE_BASE_URL) baseUrl: string) {
+  constructor(private http: HttpClient, @Optional() @Inject(PROXIMAX_REMOTE_BASE_URL) baseUrl: string) {
     if (baseUrl) {
       this.baseUrl = baseUrl;
     }
