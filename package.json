@@ -8,7 +8,6 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "compodoc": "compodoc -p projects/xpx-typescript-angular-sdk/tsconfig.lib.json",
     "test_lib": "ng test xpx-typescript-angular-sdk",
     "build_lib": "ng build xpx-typescript-angular-sdk --prod",
     "npm-post-build": "cp README.MD dist/xpx-typescript-angular-sdk",

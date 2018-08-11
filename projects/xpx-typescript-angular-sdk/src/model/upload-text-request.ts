@@ -15,40 +15,39 @@
  */
 
 /**
- * Class represents the UploadTextRequest
+ * Interface represents the UploadTextRequest
  */
-export class UploadTextRequest {
-    constructor(
-        /**
-         * The name of the upload request payload
-         */
-        public  name?: string,
+export interface UploadTextRequest {
 
-        /**
-        * The text of the upload request payload
-        */
-        public  text?: string,
+    /**
+     * The name of the upload request payload
+     */
+    name?: string;
 
-        /**
-         * The keyword of the upload request payload
-         */
-        public  keywords?: string,
+    /**
+    * The text of the upload request payload
+    */
+    text?: string;
 
-        /**
-         * The metadata of the upload request payload
-         * The metadata must be in JSON format e.g. {'Author':'ProximaX'}
-         */
-        public  metadata?: string,
+    /**
+     * The keyword of the upload request payload
+     */
+    keywords?: string;
 
-        /**
-         * The content type of the upload request payload e.g. text/plain
-         */
-        public  contentType?: string,
+    /**
+     * The metadata of the upload request payload
+     * The metadata must be in JSON format e.g. {'Author':'ProximaX'}
+     */
+    metadata?: string;
 
-        /**
-         * The encoding of the upload payload e.g. UTF-8
-         */
-        public  encoding?: string) {
+    /**
+     * The content type of the upload request payload e.g. text/plain
+     */
+    contentType?: string;
 
-    }
+    /**
+     * The encoding of the upload payload e.g. UTF-8
+     */
+    encoding?: string;
+
 }

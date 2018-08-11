@@ -15,36 +15,34 @@
  */
 
 /**
- * Class represents the UploadBinaryRequest payload
+ * Interface represents the UploadBinaryRequest payload
  */
-export class UploadBinaryRequest {
-    constructor(
-        /**
-         * The name of the upload request payload
-         */
-        public  name?: string,
+export interface UploadBinaryRequest {
 
-        /**
-        * The data of the upload request payload e.g in byte array
-        */
-        public  data?: any,
+    /**
+     * The name of the upload request payload
+     */
+    name?: string;
 
-        /**
-         * The keyword of the upload request payload
-         */
-        public  keywords?: string,
+    /**
+    * The data of the upload request payload e.g in byte array
+    */
+    data?: any;
 
-        /**
-         * The metadata of the upload request payload
-         * The metadata must be in JSON format e.g. {'Author':'ProximaX'}
-         */
-        public  metadata?: string,
+    /**
+     * The keyword of the upload request payload
+     */
+    keywords?: string;
 
-        /**
-         * The content type of the upload request payload e.g. text/plain
-         */
-        public  contentType?: string) {
+    /**
+     * The metadata of the upload request payload
+     * The metadata must be in JSON format e.g. {'Author':'ProximaX'}
+     */
+    metadata?: string;
 
-    }
+    /**
+     * The content type of the upload request payload e.g. text/plain
+     */
+    contentType?: string;
 
 }

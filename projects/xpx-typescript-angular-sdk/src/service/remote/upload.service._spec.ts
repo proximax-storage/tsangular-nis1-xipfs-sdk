@@ -36,7 +36,16 @@ describe('RemoteUploadService', () => {
   it('#uploadText should throw error if upload text data field \'text\' is empty',
     async(inject([RemoteUploadService], (service: RemoteUploadService) => {
       expect(service).toBeTruthy();
-      const payload = new UploadTextRequest('test', '', 'test', '{\'author\':\'proximax\'}', 'text/plain', 'utf-8');
+
+      const payload: UploadTextRequest = {
+        contentType: 'text/plain',
+        encoding: 'utf-8',
+        name: 'test',
+        keywords: '',
+        text: 'Proximax P2P Storage',
+        metadata: '{\'author\':\'ProximaX\'}'
+      }
+
       expect(() => service.uploadText(payload).subscribe()).toThrowError('The request payload \'text\' field is required');
 
     })));
@@ -44,7 +53,20 @@ describe('RemoteUploadService', () => {
   it('#uploadText should throw error if upload text data field \'text\' is null',
     async(inject([RemoteUploadService], (service: RemoteUploadService) => {
       expect(service).toBeTruthy();
-      const payload = new UploadTextRequest('test', null, 'test', '{\'author\':\'proximax\'}', 'text/plain', 'utf-8');
+
+      const metadata = {
+        'author': 'Proximax'
+      };
+
+
+      const payload: UploadTextRequest = {
+        contentType: 'text/plain',
+        encoding: 'utf-8',
+        name: 'test',
+        keywords: '',
+        text: '',
+        metadata: JSON.stringify(metadata)
+      }
       expect(() => service.uploadText(payload).subscribe()).toThrowError('The request payload \'text\' field is required');
 
     })));
@@ -52,7 +74,20 @@ describe('RemoteUploadService', () => {
   it('#uploadText should throw error if upload metadata field \'text\' is not valid JSON format',
     async(inject([RemoteUploadService], (service: RemoteUploadService) => {
       expect(service).toBeTruthy();
-      const payload = new UploadTextRequest('test', 'Proximax is awesome', 'test', 'test', 'text/plain', 'utf-8');
+
+      const metadata = {
+        'author': 'Proximax'
+      };
+
+
+      const payload: UploadTextRequest = {
+        contentType: 'text/plain',
+        encoding: 'utf-8',
+        name: 'test',
+        keywords: '',
+        text: 'Proximax P2P Storage',
+        metadata: 'test'
+      }
       expect(() => service.uploadText(payload).subscribe()).toThrowError('The request payload \'metadata\' field must be a valid JSON');
 
     })));
@@ -65,7 +100,15 @@ describe('RemoteUploadService', () => {
         'author': 'Proximax'
       };
 
-      const payload = new UploadTextRequest('test', 'This is an awesome Proximax', 'test', JSON.stringify(metadata), 'text/plain', 'utf-8');
+
+      const payload: UploadTextRequest = {
+        contentType: 'text/plain',
+        encoding: 'utf-8',
+        name: 'test',
+        keywords: '',
+        text: 'Proximax P2P Storage',
+        metadata: JSON.stringify(metadata)
+      }
 
       service.uploadText(payload).subscribe((response) => {
         // console.log(response);
@@ -95,7 +138,14 @@ describe('RemoteUploadService', () => {
         byteArray.push(base64Data.charCodeAt(i));
       }
 
-      const payload = new UploadBinaryRequest('test', byteArray, 'test', JSON.stringify(metadata), 'image/jpeg');
+      const payload: UploadBinaryRequest = {
+        contentType: 'image/jpeg',
+        data: byteArray,
+        keywords: '',
+        metadata: JSON.stringify(metadata),
+        name: 'test'
+      }
+
       service.uploadBinary(payload).subscribe((response) => {
         const rhm: ResourceHashMessage = response;
 
@@ -127,7 +177,16 @@ describe('RemoteUploadService', () => {
       const pvKey = 'e62cccf54864884575a033481cabd4851429203a84849f5fc688fb651efd7f00';
       const messageType = MessageType.PLAIN;
 
-      const payload = new UploadBinaryRequest('test', byteArray, 'test', JSON.stringify(metadata), 'image/jpeg');
+      // const payload = new UploadBinaryRequest('test', byteArray, 'test', JSON.stringify(metadata), 'image/jpeg');
+
+      const payload: UploadBinaryRequest = {
+        contentType: 'image/jpeg',
+        data: byteArray,
+        keywords: '',
+        metadata: JSON.stringify(metadata),
+        name: 'test'
+      }
+
       service.uploadSignAnnounce(pvKey, pubKey, messageType, payload).subscribe((res) => {
 
         console.log(res);
@@ -194,7 +253,17 @@ describe('RemoteUploadService', () => {
         'author': 'Proximax'
       };
 
-      const payload = new UploadTextRequest('test', 'This is a test 3', 'test', JSON.stringify(metadata), 'text/plain', 'utf-8');
+     // const payload = new UploadTextRequest('test', 'This is a test 3', 'test', JSON.stringify(metadata), 'text/plain', 'utf-8');
+
+
+      const payload: UploadTextRequest = {
+        contentType: 'text/plain',
+        encoding: 'utf-8',
+        name: 'test',
+        keywords: '',
+        text: 'Proximax P2P Storage',
+        metadata: JSON.stringify(metadata)
+      }
 
       service.uploadText(payload).pipe(
         switchMap((data) => {
