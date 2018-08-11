@@ -39,7 +39,7 @@ import { Helpers } from '../../utils/helpers';
 export class RemoteUploadService {
 
   // the default baseUrl
-  protected baseUrl = 'https://testnet2.gateway.proximax.io/';
+  private baseUrl = 'https://testnet2.gateway.proximax.io/';
 
   /**
   * RemoteUploadService Constructor

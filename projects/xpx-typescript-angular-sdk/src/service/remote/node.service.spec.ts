@@ -27,7 +27,7 @@ describe('RemoteNodeServiceTest', () => {
         TestBed.configureTestingModule({
             imports: [HttpClientModule],
             providers: [RemoteNodeService,
-                { provide: REMOTE_BASE_URL, useValue: "http://example.com/api" }]
+                { provide: REMOTE_BASE_URL, useValue: "https://testnet2.gateway.proximax.io/" }]
         });
     });
 

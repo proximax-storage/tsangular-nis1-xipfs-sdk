@@ -31,7 +31,7 @@ export class RemoteAccountService {
     /**
      * The default baseURl
      */
-    protected baseUrl = 'https://testnet2.gateway.proximax.io/';
+    private baseUrl = 'https://testnet2.gateway.proximax.io/';
 
     /**
      * RemoteAccountService constructor
@@ -291,4 +291,5 @@ export class RemoteAccountService {
             reportProgress: false
         });
     }
+
 }
