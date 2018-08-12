@@ -44,7 +44,7 @@ describe('RemoteUploadService', () => {
         keywords: '',
         text: 'Proximax P2P Storage',
         metadata: '{\'author\':\'ProximaX\'}'
-      }
+      };
 
       expect(() => service.uploadText(payload).subscribe()).toThrowError('The request payload \'text\' field is required');
 
@@ -66,7 +66,7 @@ describe('RemoteUploadService', () => {
         keywords: '',
         text: '',
         metadata: JSON.stringify(metadata)
-      }
+      };
       expect(() => service.uploadText(payload).subscribe()).toThrowError('The request payload \'text\' field is required');
 
     })));
@@ -87,7 +87,7 @@ describe('RemoteUploadService', () => {
         keywords: '',
         text: 'Proximax P2P Storage',
         metadata: 'test'
-      }
+      };
       expect(() => service.uploadText(payload).subscribe()).toThrowError('The request payload \'metadata\' field must be a valid JSON');
 
     })));
@@ -108,7 +108,7 @@ describe('RemoteUploadService', () => {
         keywords: '',
         text: 'Proximax P2P Storage',
         metadata: JSON.stringify(metadata)
-      }
+      };
 
       service.uploadText(payload).subscribe((response) => {
         // console.log(response);
@@ -144,7 +144,7 @@ describe('RemoteUploadService', () => {
         keywords: '',
         metadata: JSON.stringify(metadata),
         name: 'test'
-      }
+      };
 
       service.uploadBinary(payload).subscribe((response) => {
         const rhm: ResourceHashMessage = response;
@@ -185,7 +185,7 @@ describe('RemoteUploadService', () => {
         keywords: '',
         metadata: JSON.stringify(metadata),
         name: 'test'
-      }
+      };
 
       service.uploadSignAnnounce(pvKey, pubKey, messageType, payload).subscribe((res) => {
 
@@ -263,7 +263,7 @@ describe('RemoteUploadService', () => {
         keywords: '',
         text: 'Proximax P2P Storage',
         metadata: JSON.stringify(metadata)
-      }
+      };
 
       service.uploadText(payload).pipe(
         switchMap((data) => {

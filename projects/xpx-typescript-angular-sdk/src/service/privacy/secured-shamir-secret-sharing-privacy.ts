@@ -1,7 +1,6 @@
 import { TextEncoder, TextDecoder } from 'text-encoding-utf-8';
 import { SecuredCipher } from './secured-cipher';
-import { Observable } from 'rxjs';
-import 'rxjs/add/observable/fromPromise';
+import { Observable, from} from 'rxjs';
 const crypto = require('secrets.js-grempe');
 
 /**
@@ -86,7 +85,7 @@ export class SecuredWithShamirSecretSharingPrivacy {
     * @returns Observable<any>
     */
     public encrypt(data: any): Observable<any> {
-        return Observable.fromPromise(this.cipher.encrypt(data));
+        return from(this.cipher.encrypt(data));
     }
 
     /**
@@ -95,6 +94,6 @@ export class SecuredWithShamirSecretSharingPrivacy {
      * @returns Observable<any>
      */
     public decrypt(data: any): Observable<any> {
-        return Observable.fromPromise(this.cipher.decrypt(data));
+        return from(this.cipher.decrypt(data));
     }
 }

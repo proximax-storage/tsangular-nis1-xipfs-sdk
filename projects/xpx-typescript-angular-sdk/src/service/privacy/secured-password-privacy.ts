@@ -1,7 +1,7 @@
 import { SecuredCipher } from './secured-cipher';
 import { TextEncoder } from 'text-encoding-utf-8';
-import { Observable } from 'rxjs';
-import 'rxjs/add/observable/fromPromise';
+import { Observable , from } from 'rxjs';
+
 
 /**
  * Copyright 2018 ProximaX Limited
@@ -48,7 +48,7 @@ export class SecuredWithPasswordPrivacy {
      * @returns Observable<any>
      */
     public encrypt(data: any): Observable<any> {
-        return Observable.fromPromise(this.cipher.encrypt(data));
+        return from(this.cipher.encrypt(data));
 
     }
 
@@ -58,7 +58,7 @@ export class SecuredWithPasswordPrivacy {
      * @returns Observable<any>
      */
     public decrypt(data: any): Observable<any> {
-        return Observable.fromPromise(this.cipher.decrypt(data));
+        return from(this.cipher.decrypt(data));
     }
 
 }
