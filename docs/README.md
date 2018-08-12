@@ -159,9 +159,9 @@ export class AppModule { }
 
 ## 6. How to ?
 
-- [Upload content](docs/upload-content.md)
+- [Upload content](upload-content.md)
 
-- [Encrypt and decrypt content](docs/secured-content.md)
+- [Encrypt and decrypt content](secured-content.md)
 
-- [Download content](docs/encrypt-decrypt.md)
+- [Download content](encrypt-decrypt.md)
 
