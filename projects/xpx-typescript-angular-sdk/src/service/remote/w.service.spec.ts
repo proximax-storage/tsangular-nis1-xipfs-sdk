@@ -4,18 +4,18 @@ import { RemoteTransactionAnnounceService } from './transaction-announce.service
 import { RemoteUploadService } from './upload.service';
 import { RemoteNodeService } from './node.service';
 import { UploadTextRequest } from '../../model/upload-text-request';
-import { map, switchMap } from 'rxjs/operators';
+
 import { MessageType } from '../../model/message-type';
-import { NEMLibrary, NetworkTypes } from 'nem-library';
+
 
 describe('Test', () => {
 
     beforeAll(() => {
-        NEMLibrary.bootstrap(NetworkTypes.TEST_NET);
+      //  NEMLibrary.bootstrap(NetworkTypes.TEST_NET);
     });
 
     afterAll(() => {
-        NEMLibrary.reset();
+     //   NEMLibrary.reset();
     });
 
     beforeEach(() => {
@@ -35,8 +35,6 @@ describe('Test', () => {
                 // sender address
                 // TCM7R7-EL6KU4-5FR7GQ-INDPVI-TGIJQS-QB362F-STC6
 
-
-
                 const metadata = {
                     'author': 'Proximax'
                 };
@@ -54,7 +52,7 @@ describe('Test', () => {
                     messageType: MessageType.SECURE
                 };
 
-                upload.uploadTextToNem(payload).subscribe(console.log);
+                upload.uploadText(payload).subscribe(console.log);
 
                 // upload.uploadTextSync(payload);
                 // txt.test();

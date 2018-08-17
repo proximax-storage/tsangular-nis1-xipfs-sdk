@@ -16,7 +16,7 @@ import { Helpers } from '../../utils/helpers';
 
 import { RemoteTransactionAnnounceService } from './transaction-announce.service';
 import { NetworkTypes, NEMLibrary } from 'nem-library';
-import { resolveTxt } from 'dns';
+
 
 /**
  * Copyright 2018 ProximaX Limited
@@ -53,18 +53,18 @@ export class RemoteUploadService {
   * @param baseUrl the optional baseUrl
   */
   constructor(private http: HttpClient, @Optional() @Inject(PROXIMAX_REMOTE_BASE_URL) baseUrl: string,
-    @Optional() @Inject(NEM_NETWORK) netNetwork: string) {
+    @Optional() @Inject(NEM_NETWORK) netNetwork: NetworkTypes) {
     if (baseUrl) {
       this.baseUrl = baseUrl;
     }
 
     if (netNetwork) {
-      this.nemNetwork = netNetwork.toUpperCase() === 'TEST_NET' ? NetworkTypes.TEST_NET : NetworkTypes.MAIN_NET;
+      this.nemNetwork = netNetwork; // netNetwork.toUpperCase() === 'TEST_NET' ? NetworkTypes.TEST_NET : NetworkTypes.MAIN_NET;
     }
 
     // clean up incase other service initial this NEMLibrary
-    // NEMLibrary.reset();
-    // NEMLibrary.bootstrap(this.nemNetwork);
+    NEMLibrary.reset();
+    NEMLibrary.bootstrap(this.nemNetwork);
   }
 
 
@@ -79,7 +79,7 @@ export class RemoteUploadService {
    * @param payload the upload text request payload
    * @returns Observable<any>
    */
-  public uploadText(payload: UploadTextRequest): Observable<any> {
+  private uploadTextObsolete(payload: UploadTextRequest): Observable<any> {
     // request endpoint
     const endpoint = this.baseUrl + 'upload/text';
 
@@ -136,15 +136,26 @@ export class RemoteUploadService {
       catchError(Helpers.handleError));
   }
 
-  public uploadTextToNem(payload: UploadTextRequest): Observable<any> {
+  /**
+   * Uploads text to IPFS network
+   * Example:
+   *     service.uploadText(payload).subscribe((response) => {
+   *        const rhm: ResourceHashMessage = response;
+   *        const ipfsHash = rhm.hash();
+   *     });
+   *
+   * @param payload the upload text request payload
+   * @returns Observable<any>
+   */
+  public uploadText(payload: UploadTextRequest): Observable<any> {
 
-    const trxService = new RemoteTransactionAnnounceService(this.http, this.baseUrl, Helpers.getNemNetworkType(this.nemNetwork));
+    const trxService = new RemoteTransactionAnnounceService(this.http, this.baseUrl, this.nemNetwork);
 
     return this.uploadTextToIFPS(payload).pipe(
       switchMap(rhm => {
-        console.log(rhm);
+        // console.log(rhm);
         const signTransaction = trxService.signTransaction(rhm, payload.senderPrivateKey, payload.recieverPublicKey, payload.messageType);
-        console.log(signTransaction);
+        // console.log(signTransaction);
         return trxService.announceTransaction(signTransaction);
       })
     );
@@ -187,44 +198,6 @@ export class RemoteUploadService {
     });
   }
 
-  /*
-  public uploadTextSync(payload: UploadTextRequest) {
-
-    const nodeService = new RemoteNodeService(this.http, this.baseUrl);
-    const transactionService = new RemoteTransactionAnnounceService(this.http, this.baseUrl);
-
-    const upload$ = this.uploadTextToIFPS(payload);
-    const network$ = nodeService.getNetworkInfo();
-
-
-    // let networkInfo;
-    // let uploadInfo;
-
-    // const networkResult$ = network$.pipe(
-    //  map(info => networkInfo = info),
-    // );
-
-
-
-    const result$ = upload$.pipe(
-     mergeMap(
-        ntw => network$,
-        (uploadResult, ntwInfo) => {
-          return transactionService.generateSignedTransaction(uploadResult, payload.senderPrivateKey, payload.recieverPublicKey, ntwInfo)
-        }
-      ),
-      map(val => {
-        console.log(val);
-      })
-    );
-
-    result$.subscribe(response => {
-      console.log(response);
-
-    }, noop, () => console.log('completed'));
-
-  }
-*/
   /**
    * Uploads binary file to IPFS network
    * Example:
@@ -236,7 +209,7 @@ export class RemoteUploadService {
    * @param payload the upload binary request payload
    * @returns Observable<any>
    */
-  public uploadBinary(payload: UploadBinaryRequest): Observable<any> {
+  private uploadBinaryObsolete(payload: UploadBinaryRequest): Observable<any> {
     // request endpoint
     const endpoint = this.baseUrl + 'upload/bytes/binary';
 
@@ -286,6 +259,66 @@ export class RemoteUploadService {
       })
       ,
       catchError(Helpers.handleError));
+  }
+
+  /**
+   * Uploads binary file to IPFS network
+   * Example:
+   *     service.uploadBinary(payload).subscribe((response) => {
+   *        const rhm: ResourceHashMessage = response;
+   *        const ipfsHash = rhm.hash();
+   *     });
+   *
+   * @param payload the upload binary request payload
+   * @returns Observable<any>
+   */
+  public uploadBinary(payload: UploadBinaryRequest): Observable<any> {
+
+    const trxService = new RemoteTransactionAnnounceService(this.http, this.baseUrl, this.nemNetwork);
+
+    return this.uploadBinaryToIPFS(payload).pipe(
+      switchMap(rhm => {
+        console.log(rhm);
+        const signTransaction = trxService.signTransaction(rhm, payload.senderPrivateKey, payload.recieverPublicKey, payload.messageType);
+        console.log(signTransaction);
+        return trxService.announceTransaction(signTransaction);
+      })
+    );
+  }
+
+  private uploadBinaryToIPFS(payload: UploadBinaryRequest): Observable<any> {
+    // request endpoint
+    const endpoint = this.baseUrl + 'upload/bytes/binary';
+
+    if (payload === null) {
+      throw new Error('The request payload could not be null');
+    } else if (payload.data === null) {
+      throw new Error('The request payload \'data\' field is required');
+    } else if (!Helpers.isJSONString(payload.metadata)) {
+      throw new Error('The request payload \'metadata\' field must be a valid JSON');
+    }
+
+    // request headers
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Accept': '*/*'
+    });
+
+    // request body
+    const bodyData = JSON.stringify(payload);
+
+    // response type
+    const responseType = 'text';
+
+    // return full response
+    const observe = 'response';
+
+    return this.http.post(endpoint, bodyData, {
+      responseType: responseType,
+      headers: headers,
+      observe: observe,
+      reportProgress: true
+    });
   }
 
   /**

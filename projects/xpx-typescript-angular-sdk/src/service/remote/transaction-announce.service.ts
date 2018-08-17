@@ -50,19 +50,19 @@ export class RemoteTransactionAnnounceService {
    * @param baseUrl the optional baseUrl
    */
   constructor(private http: HttpClient, @Optional() @Inject(PROXIMAX_REMOTE_BASE_URL) baseUrl: string,
-    @Optional() @Inject(NEM_NETWORK) netNetwork: string) {
+    @Optional() @Inject(NEM_NETWORK) netNetwork: NetworkTypes) {
 
     if (baseUrl) {
       this.baseUrl = baseUrl;
     }
 
     if (netNetwork) {
-      this.nemNetwork = netNetwork.toUpperCase() === 'TEST_NET' ? NetworkTypes.TEST_NET : NetworkTypes.MAIN_NET;
+      this.nemNetwork = netNetwork; // netNetwork.toUpperCase() === 'TEST_NET' ? NetworkTypes.TEST_NET : NetworkTypes.MAIN_NET;
     }
 
     // clean up incase other service initial this NEMLibrary
-   // NEMLibrary.reset();
-    // NEMLibrary.bootstrap(this.nemNetwork);
+     NEMLibrary.reset();
+     NEMLibrary.bootstrap(this.nemNetwork);
   }
 
 

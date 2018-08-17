@@ -3,7 +3,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { MessageType } from '../../model/message-type';
 import { RemoteTransactionAnnounceService } from './transaction-announce.service';
 import { RemoteNodeService } from './node.service';
-import { NemAnnounceResult, NEMLibrary, NetworkTypes } from '../../../../../node_modules/nem-library';
+import { NemAnnounceResult, NEMLibrary, NetworkTypes } from 'nem-library';
 
 /**
  * Copyright 2018 ProximaX Limited
@@ -23,11 +23,11 @@ import { NemAnnounceResult, NEMLibrary, NetworkTypes } from '../../../../../node
 
 describe('RemoteTransactionAnnounceServiceTest', () => {
     beforeAll(() => {
-        NEMLibrary.bootstrap(NetworkTypes.TEST_NET);
+       // NEMLibrary.bootstrap(NetworkTypes.TEST_NET);
     });
 
     afterAll(() => {
-        NEMLibrary.reset();
+       // NEMLibrary.reset();
     });
 
     beforeEach(() => {

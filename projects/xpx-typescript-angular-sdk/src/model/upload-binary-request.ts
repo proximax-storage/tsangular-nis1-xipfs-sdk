@@ -1,3 +1,5 @@
+import { MessageType } from "./message-type";
+
 /**
  * Copyright 2018 ProximaX Limited
  *
@@ -45,4 +47,18 @@ export interface UploadBinaryRequest {
      */
     contentType?: string;
 
+    /**
+     * The sender private key
+     */
+    senderPrivateKey?: string;
+
+    /**
+    * The recipient public key
+    */
+    recieverPublicKey?: string;
+
+    /**
+     * The message type
+     */
+    messageType?: MessageType;
 }

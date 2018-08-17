@@ -52,10 +52,19 @@ export interface UploadTextRequest {
      */
     encoding?: string;
 
+    /**
+     * The sender private key
+     */
     senderPrivateKey?: string;
 
+    /**
+    * The recipient public key
+    */
     recieverPublicKey?: string;
 
+    /**
+     * The message type
+     */
     messageType?: MessageType;
 
 }

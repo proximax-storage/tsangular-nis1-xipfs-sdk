@@ -6,7 +6,8 @@ By default, the ProximaX gateway is set to [https://testnet2.gateway.proximax.io
 
 ## Uploading a text
 
-In this section, we will upload the simple text message to the IFPF network.
+In this section, we will upload the simple text message to the IFPF network and
+announce the transaction to NEM network
 
 - Inject RemoteUploadService into component constructor
 
@@ -42,22 +43,27 @@ const payload: UploadTextRequest = {
   encoding: 'utf-8',
   keywords: '', // optional
   metadata: '', // optional
-  text: 'ProximaX is a project that utilizes the NEM blockchain technology with the IPFS P2P storage technology to form a very powerful proofing solution for documents or files which are stored in an immutable and irreversible manner, similar to the blockchain technology solutions.'
+  text: 'ProximaX is a project that utilizes the NEM blockchain technology with the IPFS P2P storage technology to form a very powerful proofing solution for documents or files which are stored in an immutable and irreversible manner, similar to the blockchain technology solutions.',
+  senderPrivateKey: '', // enter the sender private key
+  recieverPublicKey: '', // enter the reciever public key
+  messageType: MessageType.PLAIN // either PLAIN or SECURE
+  
 };
 
 // upload text to IPFS network
-this.uploadService.uploadText(payload).subscribe(result => {
-  const rhm: ResourceHashMessage = result; 
+this.uploadService.uploadText(payload).subscribe(response => {
+ 
+  const nr: NemAnnounceResult = response.body;
 
-  // return the datahash from IPFS network
-  console.log(rhm.hash()); //QmcQoG9VT4XYPNEpftg5to3vDmYifmGQ6c2w4oMcowgMsi
+  // return the datahash from NEM network
+  // 1725f6266f70104f2ea4320ccefae6d9cb1683fb0cab4c7e6bf97ece8c7d3bc1
+  console.log(nr.transactionHash.data);  
 });
 ```
-Note: These operations will not announce the result transaction to NEM network.
 
 ## Uploading a binary file to IPFS network
 
-In this section, we will upload the image file (jpeg format) to the IFPF network.
+In this section, we will upload the image file (jpeg format) to the IFPF network and announce the transaction result to NEM network
 
 - Inject RemoteUploadService into component constructor
 
@@ -121,18 +127,20 @@ const payload: UploadBinaryRequest = {
   contentType: 'image/jpeg',
   keywords: '', // optional
   metadata: '', // optional
-  data: binaryData
+  data: binaryData,
+  senderPrivateKey: '', // enter the sender private key
+  recieverPublicKey: '', // enter the reciever public key
+  messageType: MessageType.PLAIN // either PLAIN or SECURE
+  
 };
 
 // upload binary file to IPFS network
-this.uploadService.uploadBinary(payload).subscribe(result => {
-  const rhm: ResourceHashMessage = result; 
+this.uploadService.uploadBinary(payload).subscribe(response => {
+ 
+  const nr: NemAnnounceResult = response.body;
 
-  // return the datahash from IPFS network
-  console.log(rhm.hash()); //QmcQoG9VT4XYPNEpftg5to3vDmYifmGQ6c2w4oMcowgMsi
+  // return the datahash from NEM network
+  // 1725f6266f70104f2ea4320ccefae6d9cb1683fb0cab4c7e6bf97ece8c7d3bc1
+  console.log(nr.transactionHash.data);  
 });
 ```
-
-Note: These operations will not announce the result transaction to NEM network.
-
-## Generate content signature and announce the content hash to NEM network
