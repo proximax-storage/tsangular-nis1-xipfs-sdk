@@ -47,5 +47,5 @@ export interface Network {
     /**
      * The nem network protocol
      */
-    nemNetworkProtocol?: string,
+    nemNetworkProtocol?: string;
 }

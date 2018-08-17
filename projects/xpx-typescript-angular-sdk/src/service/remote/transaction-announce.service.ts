@@ -1,13 +1,18 @@
-import { Injectable, SimpleChange, Optional, Inject } from '@angular/core';
+import { Injectable, Optional, Inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { SignedTransaction } from '../../model/signed-transaction';
-import { Observable, Observer } from 'rxjs';
-import { switchMap, map } from 'rxjs/operators';
+
+import { Observable } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 import { RemoteNodeService } from './node.service';
-import { NemAnnounceResult } from '../../model/nem-announce-resource';
-import { Network } from '../../model/network';
-import { PROXIMAX_REMOTE_BASE_URL } from '../../model/constants';
-const nem = require('nem-sdk').default;
+
+import { PROXIMAX_REMOTE_BASE_URL, NEM_NETWORK } from '../../model/constants';
+import {
+  NetworkTypes, NemAnnounceResult,
+  NEMLibrary, Account, XEM, TransferTransaction, TimeWindow, PlainMessage, SignedTransaction
+} from 'nem-library';
+import { MessageType } from '../../model/message-type';
+import { XPX } from '../../model/XPX';
+
 
 /**
  * Copyright 2018 ProximaX Limited
@@ -37,45 +42,96 @@ export class RemoteTransactionAnnounceService {
    */
   private baseUrl = 'https://testnet2.gateway.proximax.io/';
 
+  private nemNetwork = NetworkTypes.TEST_NET;
+
   /**
    * RemoteTransactionAnnounceService Constructor
    * @param http the HttpClient instance
    * @param baseUrl the optional baseUrl
    */
-  constructor(
-    private http: HttpClient,
-    @Optional()
-    @Inject(PROXIMAX_REMOTE_BASE_URL)
-    baseUrl: string
-  ) {
+  constructor(private http: HttpClient, @Optional() @Inject(PROXIMAX_REMOTE_BASE_URL) baseUrl: string,
+    @Optional() @Inject(NEM_NETWORK) netNetwork: string) {
+
     if (baseUrl) {
       this.baseUrl = baseUrl;
     }
+
+    if (netNetwork) {
+      this.nemNetwork = netNetwork.toUpperCase() === 'TEST_NET' ? NetworkTypes.TEST_NET : NetworkTypes.MAIN_NET;
+    }
+
+    // clean up incase other service initial this NEMLibrary
+   // NEMLibrary.reset();
+    // NEMLibrary.bootstrap(this.nemNetwork);
+  }
+
+
+  /**
+   * Sign the data transaction
+   * @param data the data to be signed
+   * @param senderPrivateKey the sender private key
+   * @param recipientPublicKey the recipient public key
+   * @param messageType the message type
+   * @returns the SignedTransaction
+   */
+  public signTransaction(data: string, senderPrivateKey: string, recipientPublicKey: string, messageType?: MessageType): SignedTransaction {
+
+    if (data === null || data === undefined) {
+      throw new Error('The request data is required');
+    }
+
+    if (senderPrivateKey === null || senderPrivateKey === undefined) {
+      throw new Error('The sender private key is required');
+    }
+
+    if (recipientPublicKey === null || recipientPublicKey === undefined) {
+      throw new Error('The recipient public key is required');
+    }
+
+    const senderAccount = Account.createWithPrivateKey(senderPrivateKey);
+
+    if (senderAccount === null) {
+      throw new Error('Unable to find the sender account');
+    }
+
+    const recipientAccount = Account.createWithPublicKey(recipientPublicKey);
+
+    if (recipientAccount === null) {
+      throw new Error('Unable to find the recipient account');
+    }
+
+    const nemMosaic = new XEM(1);
+    const xpxMosaic = new XPX(1);
+    const message = (messageType === MessageType.SECURE) ? senderAccount.encryptMessage(data, recipientAccount) : PlainMessage.create(data);
+
+    const transferTransaction = TransferTransaction.createWithMosaics(
+      TimeWindow.createWithDeadline(),
+      recipientAccount.address,
+      [nemMosaic, xpxMosaic],
+      message
+    );
+
+    return senderAccount.signTransaction(transferTransaction);
+
   }
 
   /**
    * Announce the data signature to NEM network
+   * TODO: Upgrade to TransactionHttp from Nem-library when version 2.x is available
    * @param payload the SignedTransaction payload
    * @returns Observable<any>
    */
-  public transactionAnnounce(payload: SignedTransaction): Observable<any> {
-    if (payload === null) {
-      throw new Error(
-        'The request SignedTransaction payload could not be null'
-      );
+  public announceTransaction(signedTransaction: SignedTransaction): Observable<any> {
+    if (signedTransaction === null) {
+      throw new Error('The request SignedTransaction payload could not be null');
     }
 
     // get node info and announce to NEM network
     const nodeService = new RemoteNodeService(this.http, this.baseUrl);
 
-    return nodeService.getNodeInfo().pipe(
+    return nodeService.getNetworkInfo().pipe(
       switchMap(node => {
-        const endpoint =
-          'http://' +
-          node.networkAddress +
-          ':' +
-          node.networkPort +
-          '/transaction/announce';
+        const endpoint = `${node.nemNetworkProtocol}://${node.networkAddress}:${node.networkPort}/transaction/announce`;
 
         // request headers
         const headers = new HttpHeaders({
@@ -83,8 +139,8 @@ export class RemoteTransactionAnnounceService {
         });
 
         const observe = 'response';
-
-        return this.http.post<NemAnnounceResult>(endpoint, payload, {
+        console.log(endpoint);
+        return this.http.post<NemAnnounceResult>(endpoint, signedTransaction, {
           headers: headers,
           observe: observe,
           reportProgress: true
@@ -93,174 +149,4 @@ export class RemoteTransactionAnnounceService {
     );
   }
 
-  /**
-   *
-   * @param data
-   * @param pvKey
-   * @param pubKey
-   * @param network
-   */
-  public generateSignedTransaction(
-    data: any,
-    pvKey: string,
-    pubKey: string,
-    network?: Network
-  ): Promise<SignedTransaction> {
-    const signedTransaction: SignedTransaction = {
-      data: '',
-      signature: ''
-    };
-
-    if (data === null) {
-      throw new Error('The data could not be null');
-    }
-
-    if (pvKey === null || pvKey === undefined) {
-      throw new Error('The sender private key could not be null');
-    }
-
-    if (pubKey === null || pubKey === undefined) {
-      throw new Error('The reciever public key could not be null');
-    }
-
-    // get empty unprepared transfer object
-    const transferTransaction = nem.model.objects.get('transferTransaction');
-
-    // Get a mosaicDefinitionMetaDataPair object with preloaded xem definition
-    const mosaicDefinitionMetaDataPair = nem.model.objects.get(
-      'mosaicDefinitionMetaDataPair'
-    );
-
-    // get common object to hold pass and key
-    const common = nem.model.objects.get('common');
-
-    if (!nem.utils.helpers.isPrivateKeyValid(pvKey)) {
-      throw new Error(
-        'Invalid private key, the private key must be in hexadecimal'
-      );
-    }
-
-    if (!nem.utils.helpers.isPublicKeyValid(pubKey)) {
-      throw new Error(
-        'Invalid private key, the private key must be in hexadecimal'
-      );
-    }
-
-    // assign private key
-    common.privateKey = pvKey;
-
-    // create keypair from the private key
-    const senderKp = nem.crypto.keyPair.create(
-      nem.utils.helpers.fixPrivateKey(common.privateKey)
-    );
-
-    // create address from recipient public key
-    const recipientAddress = nem.model.address.toAddress(pubKey, network.id);
-
-    // attach message to transaction
-    transferTransaction.message = data;
-
-    // attach recipient to transaction
-    transferTransaction.recipient = recipientAddress;
-
-    // Create a Nem mosaic attachment object
-    const nemMosaicAttachment = nem.model.objects.create('mosaicAttachment')(
-      'nem',
-      'xem',
-      1
-    );
-
-    // Push attachment into transaction mosaics
-    transferTransaction.mosaics.push(nemMosaicAttachment);
-
-    // Create a XPX mosaic attachment object
-    const xpxMosaicAttachment = nem.model.objects.create('mosaicAttachment')(
-      'prx',
-      'xpx',
-      1 / 10000
-    );
-
-    // Push attachment into transaction mosaics
-    transferTransaction.mosaics.push(xpxMosaicAttachment);
-
-    // get the definition
-    const endpoint = nem.model.objects.create('endpoint')(
-      network.nemNetworkProtocol + '://' + network.networkAddress,
-      network.networkPort
-    );
-
-    return nem.com.requests.namespace
-      .mosaicDefinitions(endpoint, xpxMosaicAttachment.mosaicId.namespaceId)
-      .then(response => {
-        console.log(response.data);
-        const neededDefinition = nem.utils.helpers.searchMosaicDefinitionArray(
-          response.data,
-          ['xpx']
-        );
-
-        // Get full name of mosaic to use as object key
-        const fullMosaicName = nem.utils.format.mosaicIdToName(
-          xpxMosaicAttachment.mosaicId
-        );
-
-        // Check if the mosaic was found
-        if (undefined === neededDefinition[fullMosaicName]) {
-          return console.error('Mosaic not found !');
-        }
-
-        // Set eur mosaic definition into mosaicDefinitionMetaDataPair
-        mosaicDefinitionMetaDataPair[fullMosaicName] = {};
-        mosaicDefinitionMetaDataPair[fullMosaicName].mosaicDefinition =
-          neededDefinition[fullMosaicName];
-
-        // Prepare the updated transfer transaction object
-        const transactionEntity = nem.model.transactions.prepare(
-          'mosaicTransferTransaction'
-        )(
-          common,
-          transferTransaction,
-          mosaicDefinitionMetaDataPair,
-          network.id
-        );
-
-        // Serialize the transaction
-        const serialized = nem.utils.serialization.serializeTransaction(
-          transactionEntity
-        );
-
-        // Sign the serialized transaction with keypair object
-        const signature = senderKp.sign(serialized);
-
-        signedTransaction.data = nem.utils.convert.ua2hex(serialized);
-        signedTransaction.signature = signature.toString();
-
-        return signedTransaction;
-      });
-  }
-
-  /**
-   * Get the XPX transaction
-   * @param hash the NEM hash
-   * @deprecated DO NOT USE
-   */
-  public getTransaction(hash: string): Observable<any> {
-    const endpoint = this.baseUrl + 'transaction/get';
-
-    if (hash === null || hash === undefined) {
-      throw new Error('The hash is required');
-    }
-
-    // create url path based on the endpoint
-    const urlPath = endpoint + '/' + encodeURIComponent(hash);
-
-    // request headers
-    const headers = new HttpHeaders({
-      Accept: 'application/json'
-    });
-
-    return this.http.get(urlPath, {
-      headers: headers,
-      reportProgress: true
-    });
-  }
 }

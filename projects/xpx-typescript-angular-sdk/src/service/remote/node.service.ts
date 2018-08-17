@@ -165,7 +165,7 @@ export class RemoteNodeService {
                         break;
                 }
 
-                let network: Network = {
+                const network: Network = {
                     id: networkId,
                     prefix: networkPrefix,
                     char: networkChar,

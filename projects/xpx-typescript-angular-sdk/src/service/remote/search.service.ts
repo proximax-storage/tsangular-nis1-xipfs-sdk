@@ -35,7 +35,7 @@ export class RemoteSearchService {
      */
     private baseUrl = 'https://testnet2.gateway.proximax.io/';
 
-   
+
     /**
      * RemoteSearchService Constructor
      * @param http the HttpClient instance

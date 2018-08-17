@@ -1,16 +1,10 @@
 import { TestBed, inject, async } from '@angular/core/testing';
-
-import { RemoteUploadService } from './upload.service';
 import { HttpClientModule } from '@angular/common/http';
-import { UploadBinaryRequest } from '../../model/upload-binary-request';
-
-
 import { MessageType } from '../../model/message-type';
-
 import { RemoteTransactionAnnounceService } from './transaction-announce.service';
-import { switchMap } from 'rxjs/operators';
-import { Network } from '../../model/network';
-const nem = require('nem-sdk').default;
+import { RemoteNodeService } from './node.service';
+import { NemAnnounceResult, NEMLibrary, NetworkTypes } from '../../../../../node_modules/nem-library';
+
 /**
  * Copyright 2018 ProximaX Limited
  *
@@ -28,11 +22,21 @@ const nem = require('nem-sdk').default;
  */
 
 describe('RemoteTransactionAnnounceServiceTest', () => {
+    beforeAll(() => {
+        NEMLibrary.bootstrap(NetworkTypes.TEST_NET);
+    });
+
+    afterAll(() => {
+        NEMLibrary.reset();
+    });
+
     beforeEach(() => {
         TestBed.configureTestingModule({
             imports: [HttpClientModule],
-            providers: [RemoteTransactionAnnounceService, RemoteUploadService]
+            providers: [RemoteTransactionAnnounceService, RemoteNodeService]
         });
+
+
     });
 
     it('RemoteTransactionAnnounceService instance should be created',
@@ -40,73 +44,106 @@ describe('RemoteTransactionAnnounceServiceTest', () => {
             expect(service).toBeTruthy();
         }));
 
-    it('#generateSignedTransaction should return SignedTransaction',
+    it('#signTransaction with PLAIN message type should return result',
         inject([RemoteTransactionAnnounceService], (service: RemoteTransactionAnnounceService) => {
-            expect(service).toBeTruthy();
 
-            const senderPvKey = 'e62cccf54864884575a033481cabd4851429203a84849f5fc688fb651efd7f00';
-            const senderPvKey2 = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
-            const networkId = -104;
-            const recipientPubKey = '3be53ccd491d878d7d2a8696ab0a1662ea9644388b81249fccdc921305336190';
-            // get common object to hold pass and key
-            let common = nem.model.objects.get("common");
-            common.privateKey = senderPvKey;
-            console.log(common);
-            const isValid = nem.utils.helpers.isPrivateKeyValid(common.privateKey);
-            console.log(isValid);
-            const senderKp = nem.crypto.keyPair.create(nem.utils.helpers.fixPrivateKey(common.privateKey));
-            console.log(senderKp);
+            const data = 'ProximaX is an advanced extension of the Blockchain and Distributed'
+                + 'Ledger Technology (DLT) with utility-rich services and protocols';
 
-            const recipientAddress = nem.model.address.toAddress(recipientPubKey, networkId)
-            console.log(recipientAddress);
-            let network: Network = {
-                id: -104,
-                prefix: '68',
-                char: 'T',
-                networkAddress: '23.228.67.85',
-                networkPort: 7890,
-                nemNetworkProtocol:'http'
-            }
-            const data = 'This is a message data';
+            const senderPVKey = 'f7c843068db612ca44f7f7815a11eb1260c614981eefe861e11bc6888cf307d1';
+            const recipientPubKey = '9a4309197988e13ecd2682b4d9f47b802bce0627a174ec5f96c184dfa6db794f';
+            const messageType = MessageType.PLAIN;
 
-            const signedTransaction = service.generateSignedTransaction(data, senderPvKey, recipientPubKey, network).then(response => {
-                console.log(response);
-            });
-         
-            
+            const signTransaction = service.signTransaction(data, senderPVKey, recipientPubKey, messageType);
+            console.log(signTransaction);
+            expect(signTransaction.data.length > 0).toBe(true);
+            expect(signTransaction.signature.length > 0).toBe(true);
         }));
 
+    it('#announceTransaction with PLAIN message type should return datahash',
+        inject([RemoteTransactionAnnounceService], (service: RemoteTransactionAnnounceService) => {
+
+            const data = Date.now() + ' _ProximaX is an advanced extension of the Blockchain and Distributed'
+                + 'Ledger Technology (DLT) with utility-rich services and protocols';
+
+            const senderPVKey = 'f7c843068db612ca44f7f7815a11eb1260c614981eefe861e11bc6888cf307d1';
+            const recipientPubKey = '9a4309197988e13ecd2682b4d9f47b802bce0627a174ec5f96c184dfa6db794f';
+            const messageType = MessageType.PLAIN;
+
+            const signTransaction = service.signTransaction(data, senderPVKey, recipientPubKey, messageType);
+            console.log(signTransaction);
+            expect(signTransaction.data.length > 0).toBe(true);
+            expect(signTransaction.signature.length > 0).toBe(true);
+
+            service.announceTransaction(signTransaction).subscribe(
+                response => {
+                    console.log(response);
+                    const nr: NemAnnounceResult = response.body;
+                    console.log(nr.transactionHash.data);
+                    expect(response.status).toBe(200);
+                    expect(nr).not.toBe(null);
+                    expect(nr.transactionHash.data.length > 0).toBe(true);
+                }
+            );
+        }));
+
+    it('#announceTransaction with SECURE message type should return datahash',
+        inject([RemoteTransactionAnnounceService], (service: RemoteTransactionAnnounceService) => {
+
+            // tslint:disable-next-line:max-line-length
+            const data = 'GAAAABQAJAAgABwAGAAUABAAAAAIAAQAFAAAACAAAADL7RhGZQEAACQAAAAsAAAARAAAAEgAAAB4AAAACgAAAHRleHQvcGxhaW4AAAQAAAB0ZXN0AAAAABUAAAB7ImF1dGhvciI6IlByb3hpbWF4In0AAAAAAAAAAAAAAC4AAABRbVZ5M3R3SllZUmVHVmRvdUVkNnZpUUh5aFJZa1l6VnBuUEhWZmRMUmVxdlA2AABAAAAAZDJiMDc2OTQ0OWZkOWUxMDdmOGUyNGE3OWZiNmVjMzMyMzQ3MjdlZWEzMjE5M2Q2NDllMTA3ZjMyNzRkNTM1NQAAAAA=';
+
+            const senderPVKey = 'f7c843068db612ca44f7f7815a11eb1260c614981eefe861e11bc6888cf307d1';
+            const recipientPubKey = '9a4309197988e13ecd2682b4d9f47b802bce0627a174ec5f96c184dfa6db794f';
+            const messageType = MessageType.SECURE;
+
+            const signTransaction = service.signTransaction(data, senderPVKey, recipientPubKey, messageType);
+            console.log(signTransaction);
+            expect(signTransaction.data.length > 0).toBe(true);
+            expect(signTransaction.signature.length > 0).toBe(true);
+
+            service.announceTransaction(signTransaction).subscribe(
+                response => {
+                    console.log(response);
+                    const nr: NemAnnounceResult = response.body;
+                    console.log(nr.transactionHash.data);
+                    expect(response.status).toBe(200);
+                    expect(nr).not.toBe(null);
+                    expect(nr.transactionHash.data.length > 0).toBe(true);
+                }
+            );
+        }));
     /*
       it('#announceTransaction should return Datahash',
-  
+
           async(inject([RemoteUploadService, RemoteTransactionAnnounceService],
               (uploadService: RemoteUploadService, announceService: RemoteTransactionAnnounceService) => {
                   expect(uploadService).toBeTruthy();
                   expect(announceService).toBeTruthy();
-  
+
                   const metadata = {
                       'author': 'Proximax'
                   };
-  
+
                   // tslint:disable-next-line:max-line-length
                   const base64Data = 'VEVTVCBBTk5PVU5DRSBUTyBORU0gTkVUV09SSw==';
-  
+
                   // need to convert the base64 string to byte array
                   const byteArray = [];
                   for (let i = 0; i < base64Data.length; i++) {
                       byteArray.push(base64Data.charCodeAt(i));
                   }
-  
+
                   const pubKey = '3be53ccd491d878d7d2a8696ab0a1662ea9644388b81249fccdc921305336190';
                   const pvKey = 'e62cccf54864884575a033481cabd4851429203a84849f5fc688fb651efd7f00';
                   const messageType = MessageType.PLAIN;
-  
+
                   const payload = new UploadBinaryRequest('test', byteArray, 'test', JSON.stringify(metadata), 'text/plain');
                   uploadService.uploadSignAnnounce(pvKey, pubKey, messageType, payload).pipe(
                       switchMap((res) => {
-  
+
                           console.log(res);
-  
+
                           const announcePayload = res;
                           console.log('###PAYLOAD###');
                           // console.log(announcePayload);

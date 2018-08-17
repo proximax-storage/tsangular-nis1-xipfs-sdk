@@ -1,6 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { throwError } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
+import { NetworkTypes } from 'nem-library';
 
 /*
  * Copyright 2018 ProximaX Limited
@@ -58,5 +58,9 @@ export class Helpers {
         }
 
         return true;
+    }
+
+    public static getNemNetworkType(network: NetworkTypes) {
+        return network === NetworkTypes.MAIN_NET ? 'MAIN_NET' : 'TEST_NET';
     }
 }

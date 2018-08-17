@@ -1,3 +1,5 @@
+import { MessageType } from './message-type';
+
 /**
  * Copyright 2018 ProximaX Limited
  *
@@ -49,5 +51,11 @@ export interface UploadTextRequest {
      * The encoding of the upload payload e.g. UTF-8
      */
     encoding?: string;
+
+    senderPrivateKey?: string;
+
+    recieverPublicKey?: string;
+
+    messageType?: MessageType;
 
 }

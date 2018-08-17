@@ -1,18 +1,22 @@
 import { Injectable, Optional, Inject } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { map, catchError } from 'rxjs/operators';
+import { map, catchError, switchMap, tap, mergeMap } from 'rxjs/operators';
 import { UploadTextRequest } from '../../model/upload-text-request';
 import { ResourceHashMessage } from '../../model/resource-hash-message';
 import { flatbuffers } from 'flatbuffers';
 import { decode, encode } from 'typescript-base64-arraybuffer';
-import { Observable } from 'rxjs';
+import { Observable, noop, merge } from 'rxjs';
 import { UploadBinaryRequest } from '../../model/upload-binary-request';
 import { GenericResponseMessage } from '../../model/generic-response-message';
 import { MessageType } from '../../model/message-type';
 import { CustomHttpEncoder } from '../../model/custom-http-encoder';
 import { SignedTransaction } from '../../model/signed-transaction';
-import { PROXIMAX_REMOTE_BASE_URL } from '../../model/constants';
+import { PROXIMAX_REMOTE_BASE_URL, NEM_NETWORK } from '../../model/constants';
 import { Helpers } from '../../utils/helpers';
+
+import { RemoteTransactionAnnounceService } from './transaction-announce.service';
+import { NetworkTypes, NEMLibrary } from 'nem-library';
+import { resolveTxt } from 'dns';
 
 /**
  * Copyright 2018 ProximaX Limited
@@ -41,15 +45,26 @@ export class RemoteUploadService {
   // the default baseUrl
   private baseUrl = 'https://testnet2.gateway.proximax.io/';
 
+  private nemNetwork = NetworkTypes.TEST_NET;
+
   /**
   * RemoteUploadService Constructor
   * @param http the HttpClient instance
   * @param baseUrl the optional baseUrl
   */
-  constructor(private http: HttpClient, @Optional() @Inject(PROXIMAX_REMOTE_BASE_URL) baseUrl: string) {
+  constructor(private http: HttpClient, @Optional() @Inject(PROXIMAX_REMOTE_BASE_URL) baseUrl: string,
+    @Optional() @Inject(NEM_NETWORK) netNetwork: string) {
     if (baseUrl) {
       this.baseUrl = baseUrl;
     }
+
+    if (netNetwork) {
+      this.nemNetwork = netNetwork.toUpperCase() === 'TEST_NET' ? NetworkTypes.TEST_NET : NetworkTypes.MAIN_NET;
+    }
+
+    // clean up incase other service initial this NEMLibrary
+    // NEMLibrary.reset();
+    // NEMLibrary.bootstrap(this.nemNetwork);
   }
 
 
@@ -121,6 +136,95 @@ export class RemoteUploadService {
       catchError(Helpers.handleError));
   }
 
+  public uploadTextToNem(payload: UploadTextRequest): Observable<any> {
+
+    const trxService = new RemoteTransactionAnnounceService(this.http, this.baseUrl, Helpers.getNemNetworkType(this.nemNetwork));
+
+    return this.uploadTextToIFPS(payload).pipe(
+      switchMap(rhm => {
+        console.log(rhm);
+        const signTransaction = trxService.signTransaction(rhm, payload.senderPrivateKey, payload.recieverPublicKey, payload.messageType);
+        console.log(signTransaction);
+        return trxService.announceTransaction(signTransaction);
+      })
+    );
+  }
+
+  private uploadTextToIFPS(payload: UploadTextRequest): Observable<any> {
+    // request endpoint
+    const endpoint = this.baseUrl + 'upload/text';
+
+    if (payload === null) {
+      throw new Error('The request payload could not be null');
+    } else if (payload.text === null || payload.text === undefined || payload.text === '') {
+      throw new Error('The request payload \'text\' field is required');
+    } else if (!Helpers.isJSONString(payload.metadata)) {
+      throw new Error('The request payload \'metadata\' field must be a valid JSON');
+    }
+
+    // request headers
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Accept': '*/*'
+    });
+
+    // request body
+    // Let encode the payload text
+    const encodedData = btoa(payload.text);
+    payload.text = encodedData;
+
+    const bodyData = JSON.stringify(payload);
+
+    console.log(bodyData);
+
+    // response type
+    const responseType = 'text';
+
+    return this.http.post(endpoint, bodyData, {
+      responseType: responseType,
+      headers: headers,
+      reportProgress: true
+    });
+  }
+
+  /*
+  public uploadTextSync(payload: UploadTextRequest) {
+
+    const nodeService = new RemoteNodeService(this.http, this.baseUrl);
+    const transactionService = new RemoteTransactionAnnounceService(this.http, this.baseUrl);
+
+    const upload$ = this.uploadTextToIFPS(payload);
+    const network$ = nodeService.getNetworkInfo();
+
+
+    // let networkInfo;
+    // let uploadInfo;
+
+    // const networkResult$ = network$.pipe(
+    //  map(info => networkInfo = info),
+    // );
+
+
+
+    const result$ = upload$.pipe(
+     mergeMap(
+        ntw => network$,
+        (uploadResult, ntwInfo) => {
+          return transactionService.generateSignedTransaction(uploadResult, payload.senderPrivateKey, payload.recieverPublicKey, ntwInfo)
+        }
+      ),
+      map(val => {
+        console.log(val);
+      })
+    );
+
+    result$.subscribe(response => {
+      console.log(response);
+
+    }, noop, () => console.log('completed'));
+
+  }
+*/
   /**
    * Uploads binary file to IPFS network
    * Example:

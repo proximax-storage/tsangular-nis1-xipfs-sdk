@@ -20,3 +20,8 @@ import { InjectionToken } from '@angular/core';
  * The remote base url
  */
 export const PROXIMAX_REMOTE_BASE_URL = new InjectionToken('PROXIMAX_REMOTE_BASE_URL');
+
+/**
+ * The nem network
+ */
+export const NEM_NETWORK = new InjectionToken('NEM_NETWORK');
