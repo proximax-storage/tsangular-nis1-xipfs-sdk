@@ -27,6 +27,11 @@ ProximaX typescript SDK is built with Typescript and Angular 6.x, please ensure 
 npm install -g typescript @angular/cli
 ```
 
+For windows user
+
+```bash
+npm install --global --production windows-build-tool
+```
 
 ## 2. Create a new project
 
@@ -46,10 +51,10 @@ open browser http://localhost:4200
 
 You should see the Welcome to `<project-name>` page
 
-## 4. Install xpx-typescript-angular-sdk and its dependencies
+## 4. Install Proximax typescript SDK and its dependencies
 
 ```bash
-npm install xpx-typescript-angular-sdk crypto-js fast-sha256 flatbuffers nem-sdk secrets.js-grempe text-encoding-utf-8 typescript-base64-arraybuffer --save
+npm install xpx-typescript-angular-sdk crypto-js fast-sha256 flatbuffers nem-library secrets.js-grempe text-encoding-utf-8 typescript-base64-arraybuffer --save
 ```
 
 Note: The new @angular/cli version 6 will break all the 3rd party dependencies that using @Node.js such as nem-sdk and secret.js-grempe. Apply the fix below
@@ -138,7 +143,7 @@ import { NgModule } from '@angular/core';
 
 import { AppComponent } from './app.component';
 import { environment } from '../environments/environment';
-import { PROXIMAX_REMOTE_BASE_URL } from 'xpx-typescript-angular-sdk';
+import { PROXIMAX_REMOTE_BASE_URL, NEM_NETWORK } from 'xpx-typescript-angular-sdk';
 
 @NgModule({
   declarations: [
@@ -148,8 +153,8 @@ import { PROXIMAX_REMOTE_BASE_URL } from 'xpx-typescript-angular-sdk';
     BrowserModule
   ],
   providers: [
-    { provide: PROXIMAX_REMOTE_BASE_URL, 
-      useValue: environment.ProximaX.remoteConnection }
+    { provide: PROXIMAX_REMOTE_BASE_URL, useValue: environment.ProximaX.remoteConnection }, 
+    { provide: NEM_NETWORK, useValue: NetworkTypes.TEST_NET }
   ],
   bootstrap: [AppComponent]
 })
@@ -159,9 +164,9 @@ export class AppModule { }
 
 ## 6. How to ?
 
-- [Upload content](docs/upload-content.md)
+- [Upload content](upload-content.md)
 
-- [Encrypt and decrypt content](docs/secured-content.md)
+- [Encrypt and decrypt content](secured-content.md)
 
-- [Download content](docs/encrypt-decrypt.md)
+- [Download content](encrypt-decrypt.md)
 
