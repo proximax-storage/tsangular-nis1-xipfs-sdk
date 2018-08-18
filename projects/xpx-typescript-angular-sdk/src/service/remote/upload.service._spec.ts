@@ -4,10 +4,6 @@ import { RemoteUploadService } from './upload.service';
 import { HttpClientModule } from '@angular/common/http';
 import { UploadTextRequest } from '../../model/upload-text-request';
 import { UploadBinaryRequest } from '../../model/upload-binary-request';
-
-
-import { MessageType } from '../../model/message-type';
-import { decode } from 'typescript-base64-arraybuffer';
 import { ResourceHashMessage } from '../../model/resource-hash-message';
 import { switchMap } from '../../../../../node_modules/rxjs/operators';
 

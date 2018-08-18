@@ -50,7 +50,8 @@ const payload: UploadTextRequest = {
   
 };
 
-// upload text to IPFS network
+
+// upload text 
 this.uploadService.uploadText(payload).subscribe(response => {
  
   const nr: NemAnnounceResult = response.body;
@@ -61,7 +62,7 @@ this.uploadService.uploadText(payload).subscribe(response => {
 });
 ```
 
-## Uploading a binary file to IPFS network
+## Uploading a binary file
 
 In this section, we will upload the image file (jpeg format) to the IFPF network and announce the transaction result to NEM network
 
@@ -134,7 +135,7 @@ const payload: UploadBinaryRequest = {
   
 };
 
-// upload binary file to IPFS network
+// upload binary file 
 this.uploadService.uploadBinary(payload).subscribe(response => {
  
   const nr: NemAnnounceResult = response.body;
