@@ -1,14 +1,12 @@
 import { Injectable, Optional, Inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-
 import { Observable } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { RemoteNodeService } from './node.service';
-
 import { PROXIMAX_REMOTE_BASE_URL, NEM_NETWORK } from '../../model/constants';
 import {
   NetworkTypes, NemAnnounceResult,
-  NEMLibrary, Account, XEM, TransferTransaction, TimeWindow, PlainMessage, SignedTransaction
+  NEMLibrary, Account, TransferTransaction, TimeWindow, PlainMessage, SignedTransaction
 } from 'nem-library';
 import { MessageType } from '../../model/message-type';
 import { XPX } from '../../model/XPX';
@@ -42,7 +40,15 @@ export class RemoteTransactionAnnounceService {
    */
   private baseUrl = 'https://testnet2.gateway.proximax.io/';
 
+  /**
+   * The default NEM network
+   */
   private nemNetwork = NetworkTypes.TEST_NET;
+
+  /**
+   * The instance of remote node service
+   */
+  private nodeService: RemoteNodeService;
 
   /**
    * RemoteTransactionAnnounceService Constructor
@@ -57,12 +63,14 @@ export class RemoteTransactionAnnounceService {
     }
 
     if (netNetwork) {
-      this.nemNetwork = netNetwork; // netNetwork.toUpperCase() === 'TEST_NET' ? NetworkTypes.TEST_NET : NetworkTypes.MAIN_NET;
+      this.nemNetwork = netNetwork;
     }
 
-    // clean up incase other service initial this NEMLibrary
-     NEMLibrary.reset();
-     NEMLibrary.bootstrap(this.nemNetwork);
+    this.nodeService = new RemoteNodeService(this.http, this.baseUrl);
+
+    // initialise NEM library
+    NEMLibrary.reset();
+    NEMLibrary.bootstrap(this.nemNetwork);
   }
 
 
@@ -100,14 +108,14 @@ export class RemoteTransactionAnnounceService {
       throw new Error('Unable to find the recipient account');
     }
 
-    const nemMosaic = new XEM(1);
     const xpxMosaic = new XPX(1);
     const message = (messageType === MessageType.SECURE) ? senderAccount.encryptMessage(data, recipientAccount) : PlainMessage.create(data);
 
+    // do not need to attach the XEM mosaic
     const transferTransaction = TransferTransaction.createWithMosaics(
       TimeWindow.createWithDeadline(),
       recipientAccount.address,
-      [nemMosaic, xpxMosaic],
+      [xpxMosaic],
       message
     );
 
@@ -118,18 +126,18 @@ export class RemoteTransactionAnnounceService {
   /**
    * Announce the data signature to NEM network
    * TODO: Upgrade to TransactionHttp from Nem-library when version 2.x is available
+   * NOTE: This is a workaround method to announce transaction to NEM network
    * @param payload the SignedTransaction payload
    * @returns Observable<any>
    */
   public announceTransaction(signedTransaction: SignedTransaction): Observable<any> {
+    
     if (signedTransaction === null) {
       throw new Error('The request SignedTransaction payload could not be null');
     }
 
-    // get node info and announce to NEM network
-    const nodeService = new RemoteNodeService(this.http, this.baseUrl);
-
-    return nodeService.getNetworkInfo().pipe(
+    // retrieve the NEM network info specified in the node info
+    return this.nodeService.getNetworkInfo().pipe(
       switchMap(node => {
         const endpoint = `${node.nemNetworkProtocol}://${node.networkAddress}:${node.networkPort}/transaction/announce`;
 
@@ -148,5 +156,4 @@ export class RemoteTransactionAnnounceService {
       })
     );
   }
-
 }

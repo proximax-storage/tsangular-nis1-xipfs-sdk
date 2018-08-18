@@ -31,7 +31,7 @@ export * from './model/account-status';
 export * from './model/address';
 export * from './model/block-amount';
 export * from './model/key-pair';
-export * from './model/private_key';
+export * from './model/private-key';
 export * from './model/public-key';
 export * from './model/multisig-info';
 export * from './model/constants';

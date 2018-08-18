@@ -1,4 +1,4 @@
-import { PrivateKey } from './private_key';
+import { PrivateKey } from './private-key';
 import { PublicKey } from './public-key';
 
 /*
