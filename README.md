@@ -1,7 +1,6 @@
 
 
 # Proximax P2P Storage Typescript SDK (NIS1 Compatible Only)
-==================================================================
 
 ![banner](https://proximax.io/wp-content/uploads/2018/03/ProximaX-logotype.png)
 
