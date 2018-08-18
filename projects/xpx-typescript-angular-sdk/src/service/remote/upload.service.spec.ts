@@ -5,7 +5,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { UploadTextRequest } from '../../model/upload-text-request';
 import { UploadBinaryRequest } from '../../model/upload-binary-request';
 import { ResourceHashMessage } from '../../model/resource-hash-message';
-import { switchMap } from '../../../../../node_modules/rxjs/operators';
+import { switchMap } from 'rxjs/operators';
 
 
 describe('RemoteUploadService', () => {
