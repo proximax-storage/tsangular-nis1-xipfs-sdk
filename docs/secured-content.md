@@ -127,7 +127,7 @@ privacy.decrypt(encryptedData).subscribe(data => {
 
 Once you encrypt your data, you need to specify the message type in the upload parameter to be PLAIN. 
 
-If the message type in the the upload parameter is SECURE, by default, the upload API will use the NEM privacy strategy to encrypt your encrypted data before announce it to the NEM network. 
+If the message type in the the upload parameter is SECURE, by default, the upload API will use the NEM privacy strategy to encrypt your encrypted data before announcing it to the NEM network. 
 
 For example: 
 
