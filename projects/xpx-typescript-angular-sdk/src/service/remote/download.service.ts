@@ -4,8 +4,17 @@ import { TransferMode } from '../../model/transfer-mode';
 import { Observable } from 'rxjs';
 import { CustomHttpEncoder } from '../../model/custom-http-encoder';
 import { GenericResponseMessage } from '../../model/generic-response-message';
-import { PROXIMAX_REMOTE_BASE_URL } from '../../model/constants';
-
+import { PROXIMAX_REMOTE_BASE_URL, NEM_NETWORK } from '../../model/constants';
+import { DownloadRequest } from '../../model/download-request';
+import { MessageType } from '../../model/message-type';
+import { NetworkTypes, Account, EncryptedMessage } from 'nem-library';
+import { RemoteTransactionAnnounceService } from './transaction-announce.service';
+import { switchMap, map } from 'rxjs/operators';
+import { Converter } from '../../utils/converter';
+const nem = require('nem-sdk').default;
+import { decode, encode } from 'typescript-base64-arraybuffer';
+import { ResourceHashMessage } from '../../model/resource-hash-message';
+import { flatbuffers } from 'flatbuffers';
 /*
 * Copyright 2018 ProximaX Limited
 *
@@ -36,14 +45,89 @@ export class RemoteDownloadService {
     private baseUrl = 'https://testnet2.gateway.proximax.io/';
 
     /**
+    * The default NEM network
+    */
+    private nemNetwork = NetworkTypes.TEST_NET;
+
+    /**
+    * The instance of transaction announce service
+    */
+    private announceService: RemoteTransactionAnnounceService;
+
+
+
+    /**
     * RemoteDownloadService constructor
     * @param http the HttpClient instance
     * @param baseUrl the optional baseUrl
     */
-    constructor(private http: HttpClient, @Optional() @Inject(PROXIMAX_REMOTE_BASE_URL) baseUrl: string) {
+    constructor(private http: HttpClient, @Optional() @Inject(PROXIMAX_REMOTE_BASE_URL) baseUrl: string,
+        @Optional() @Inject(NEM_NETWORK) netNetwork: NetworkTypes) {
         if (baseUrl) {
             this.baseUrl = baseUrl;
         }
+
+
+        if (netNetwork) {
+            this.nemNetwork = netNetwork;
+        }
+
+        this.announceService = new RemoteTransactionAnnounceService(this.http, this.baseUrl, this.nemNetwork);
+    }
+
+    /**
+     * Download content
+     * @param payload the download request
+     */
+    public download(payload: DownloadRequest): Observable<any> {
+
+        if (payload.hash === null || payload.hash === undefined) {
+            throw new Error('The hash is required for the download request');
+        }
+
+        if (payload.messageType === MessageType.SECURE) {
+            if (payload.recipientPrivateKey === null || payload.recipientPrivateKey === undefined) {
+                throw new Error('You need to provide either recipient private key to download the SECURE content');
+            }
+
+            if (payload.senderPublicKey === null || payload.senderPublicKey === undefined) {
+                throw new Error('You need to provide sender publc key to download the SECURE content');
+            }
+        }
+
+      //  const recipientAccount = Account.createWithPrivateKey(payload.recipientPrivateKey);
+      //  const senderAccount = Account.createWithPrivateKey(payload.senderPublicKey);
+
+        return this.announceService.getTransactionByNemHash(payload.hash).pipe(
+            switchMap(result => {
+                const resultPayload = result.body.transaction.message.payload;
+
+                let base64Message;
+
+                if (payload.messageType === MessageType.SECURE) {
+                    const decodeMsg = nem.crypto.helpers.decode(payload.recipientPrivateKey, payload.senderPublicKey, resultPayload);
+                    base64Message = Converter.decodeHex(decodeMsg);
+                } else {
+                    base64Message = Converter.decodeHex(resultPayload);
+                }
+
+                //console.log(base64Message);
+                const decodeData = decode(base64Message);
+                
+                // create buffer
+                const dataBuffer = new flatbuffers.ByteBuffer(decodeData);
+                
+                
+                // deserialise the data buffer
+                const resourceHash = ResourceHashMessage.getRootAsResourceHashMessage(dataBuffer);
+
+                //console.log(resourceHash);
+
+                return this.downloadDirectDatahash(resourceHash.hash());
+
+            })
+        );
+
     }
 
 

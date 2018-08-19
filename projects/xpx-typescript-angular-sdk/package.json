@@ -13,7 +13,7 @@
   "keywords": [
     "ProximaX",
     "typescript",
-  	"angular"
+    "angular"
   ],
   "peerDependencies": {
     "@angular/common": "^6.0.3",
@@ -28,9 +28,10 @@
     "fast-sha256": "^1.1.0"
   },
   "devDependencies": {
+    "@types/crypto-js": "^3.1.43",
     "@types/flatbuffers": "^1.9.0",
-    "@types/text-encoding-utf-8": "^1.0.1",
     "@types/node": "^8.10.24",
-    "@types/crypto-js": "^3.1.43"
+    "@types/text-encoding-utf-8": "^1.0.1",
+    "@types/utf8": "^2.1.6"
   }
 }

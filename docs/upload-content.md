@@ -1,6 +1,6 @@
 # Upload Content
 
-The following operations allow user to upload text and binary file to the public IPFS network via the ProximaX pre-configure gateway.
+The following operations allow user to upload text and binary file to the Proximax storage
 
 By default, the ProximaX gateway is set to [https://testnet2.gateway.proximax.io/](https://testnet2.gateway.proximax.io/swagger-ui.html#/)
 

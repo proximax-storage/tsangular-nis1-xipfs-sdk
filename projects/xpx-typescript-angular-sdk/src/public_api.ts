@@ -35,7 +35,9 @@ export * from './model/private-key';
 export * from './model/public-key';
 export * from './model/multisig-info';
 export * from './model/constants';
+export * from './model/download-request';
 export * from './utils/helpers';
+export * from './utils/converter';
 
 
 

@@ -16,6 +16,7 @@ import { Helpers } from '../../utils/helpers';
 
 import { RemoteTransactionAnnounceService } from './transaction-announce.service';
 import { NetworkTypes, NEMLibrary } from 'nem-library';
+import { Converter } from '../../utils/converter';
 
 
 /**
@@ -111,7 +112,9 @@ export class RemoteUploadService {
 
     // request body
     // Let encode the payload text
+
     const encodedData = btoa(payload.text);
+    // const hexData = Converter.utf8ToHex(encodedData);
     payload.text = encodedData;
 
     const bodyData = JSON.stringify(payload);
@@ -173,8 +176,8 @@ export class RemoteUploadService {
 
     return this.uploadTextToIPFS(payload, false).pipe(
       switchMap(rhm => {
-        // console.log(rhm);
-        const signTransaction = this.announceService.signTransaction(rhm, payload.senderPrivateKey, payload.recieverPublicKey, payload.messageType);
+        // console.log(rhm.body);
+        const signTransaction = this.announceService.signTransaction(rhm.body, payload.senderPrivateKey, payload.recieverPublicKey, payload.messageType);
         // console.log(signTransaction);
         return this.announceService.announceTransaction(signTransaction);
       })
@@ -227,7 +230,7 @@ export class RemoteUploadService {
     // return full response
     const observe = 'response';
 
-    if(!returnHash) {
+    if (!returnHash) {
       return this.http.post(endpoint, bodyData, {
         responseType: responseType,
         headers: headers,
@@ -242,16 +245,16 @@ export class RemoteUploadService {
         reportProgress: true
       }).pipe(
         map((res) => {
-  
+
           // decode base64 string
           const data = decode(res.body);
-  
+
           // create buffer
           const dataBuffer = new flatbuffers.ByteBuffer(data);
-  
+
           // deserialise the data buffer
           const resourceHash = ResourceHashMessage.getRootAsResourceHashMessage(dataBuffer);
-  
+
           // console.log(resourceHash);
           // return the resource hash from IPFS network
           return resourceHash;
@@ -259,7 +262,7 @@ export class RemoteUploadService {
         ,
         catchError(Helpers.handleError));
     }
- 
+
   }
 
   /**
@@ -279,9 +282,9 @@ export class RemoteUploadService {
 
     return this.uploadBinaryToIPFS(payload, false).pipe(
       switchMap(rhm => {
-        console.log(rhm);
-        const signTransaction = trxService.signTransaction(rhm, payload.senderPrivateKey, payload.recieverPublicKey, payload.messageType);
-        console.log(signTransaction);
+        // console.log(rhm.body);
+        const signTransaction = trxService.signTransaction(rhm.body, payload.senderPrivateKey, payload.recieverPublicKey, payload.messageType);
+        // console.log(signTransaction);
         return trxService.announceTransaction(signTransaction);
       })
     );

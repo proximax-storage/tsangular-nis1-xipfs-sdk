@@ -40,7 +40,7 @@ describe('RemoteDownloadServiceTest', () => {
         async(inject([RemoteDownloadService], (service: RemoteDownloadService) => {
             expect(service).toBeTruthy();
 
-            const nemHash = '526fd05281b39b1dc09466ea70983b0ce41d6114cdc9a9536afbdbb218e0bae8';
+            const nemHash = '8559edd2b79e38fb26e26139318ac43e80705254cf54c399d410debda221db66';
 
             service.downloadBinary(nemHash, TransferMode.BYTES).subscribe((res) => {
                 /*  const keys = res.headers.keys();
@@ -53,7 +53,7 @@ describe('RemoteDownloadServiceTest', () => {
             });
 
         })));
-
+    /*
     it('#downloadBinary should download binary file with transfer mode = stream',
         async(inject([RemoteDownloadService], (service: RemoteDownloadService) => {
             expect(service).toBeTruthy();
@@ -122,5 +122,5 @@ describe('RemoteDownloadServiceTest', () => {
             });
 
         })));
-
+*/
 });

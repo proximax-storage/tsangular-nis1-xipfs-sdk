@@ -38,6 +38,7 @@
     "secrets.js-grempe": "^1.1.0",
     "text-encoding-utf-8": "^1.0.2",
     "typescript-base64-arraybuffer": "^0.1.0",
+    "utf8": "^3.0.0",
     "zone.js": "^0.8.26"
   },
   "devDependencies": {

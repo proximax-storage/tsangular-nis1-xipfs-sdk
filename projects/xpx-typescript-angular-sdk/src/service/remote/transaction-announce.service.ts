@@ -1,15 +1,19 @@
 import { Injectable, Optional, Inject } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { switchMap, map } from 'rxjs/operators';
 import { RemoteNodeService } from './node.service';
 import { PROXIMAX_REMOTE_BASE_URL, NEM_NETWORK } from '../../model/constants';
 import {
   NetworkTypes, NemAnnounceResult,
-  NEMLibrary, Account, TransferTransaction, TimeWindow, PlainMessage, SignedTransaction
+  NEMLibrary, Account, TransferTransaction, TimeWindow, PlainMessage, SignedTransaction, Transaction, EncryptedMessage
 } from 'nem-library';
+
+
+
 import { MessageType } from '../../model/message-type';
 import { XPX } from '../../model/XPX';
+import { CustomHttpEncoder } from '../../model/custom-http-encoder';
 
 
 /**
@@ -107,8 +111,8 @@ export class RemoteTransactionAnnounceService {
     if (recipientAccount === null) {
       throw new Error('Unable to find the recipient account');
     }
-
-    const xpxMosaic = new XPX(1);
+    
+    const xpxMosaic = new XPX(1 / 10000);
     const message = (messageType === MessageType.SECURE) ? senderAccount.encryptMessage(data, recipientAccount) : PlainMessage.create(data);
 
     // do not need to attach the XEM mosaic
@@ -131,7 +135,7 @@ export class RemoteTransactionAnnounceService {
    * @returns Observable<any>
    */
   public announceTransaction(signedTransaction: SignedTransaction): Observable<any> {
-    
+
     if (signedTransaction === null) {
       throw new Error('The request SignedTransaction payload could not be null');
     }
@@ -150,6 +154,42 @@ export class RemoteTransactionAnnounceService {
         console.log(endpoint);
         return this.http.post<NemAnnounceResult>(endpoint, signedTransaction, {
           headers: headers,
+          observe: observe,
+          reportProgress: true
+        });
+      })
+    );
+  }
+
+  /**
+   * Get the transaction by nem hash
+   * @param nemHash the nem hash
+   */
+  public getTransactionByNemHash(nemHash: string):  Observable<any> {
+
+    if (nemHash === null || nemHash === undefined) {
+      throw new Error('The nemhash is required');
+    }
+
+    // retrieve the NEM network info specified in the node info
+    return this.nodeService.getNetworkInfo().pipe(
+      switchMap(node => {
+        const endpoint = `${node.nemNetworkProtocol}://${node.networkAddress}:${node.networkPort}/transaction/get`;
+
+        // request headers
+        const headers = new HttpHeaders({
+          Accept: 'application/json'
+        });
+
+        let queryParams = new HttpParams({ encoder: new CustomHttpEncoder() });
+        queryParams = queryParams.set('hash', nemHash);
+     
+        const observe = 'response';
+        // console.log(endpoint);
+
+        return this.http.get(endpoint,{
+          headers: headers,
+          params: queryParams,
           observe: observe,
           reportProgress: true
         });

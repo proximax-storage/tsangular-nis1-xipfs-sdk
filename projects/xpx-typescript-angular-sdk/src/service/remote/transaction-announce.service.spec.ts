@@ -1,10 +1,16 @@
 import { TestBed, inject, async } from '@angular/core/testing';
 import { HttpClientModule } from '@angular/common/http';
-import { MessageType } from '../../model/message-type';
 import { RemoteTransactionAnnounceService } from './transaction-announce.service';
 import { RemoteNodeService } from './node.service';
-import { NemAnnounceResult, NEMLibrary, NetworkTypes } from 'nem-library';
 
+import { PROXIMAX_REMOTE_BASE_URL } from '../../model/constants';
+import { Converter } from '../../utils/converter';
+import { Account, EncryptedMessage, PlainMessage } from 'nem-library';
+import { DownloadRequest } from '../../model/download-request';
+import { RemoteDownloadService } from './download.service';
+import { MessageType } from '../../model/message-type';
+
+const nem = require('nem-sdk').default;
 /**
  * Copyright 2018 ProximaX Limited
  *
@@ -23,96 +29,100 @@ import { NemAnnounceResult, NEMLibrary, NetworkTypes } from 'nem-library';
 
 describe('RemoteTransactionAnnounceServiceTest', () => {
     beforeAll(() => {
-       // NEMLibrary.bootstrap(NetworkTypes.TEST_NET);
+        // NEMLibrary.bootstrap(NetworkTypes.TEST_NET);
     });
 
     afterAll(() => {
-       // NEMLibrary.reset();
+        // NEMLibrary.reset();
     });
 
     beforeEach(() => {
         TestBed.configureTestingModule({
             imports: [HttpClientModule],
-            providers: [RemoteTransactionAnnounceService, RemoteNodeService]
+            providers: [RemoteTransactionAnnounceService, RemoteNodeService,
+                {
+                    provide: PROXIMAX_REMOTE_BASE_URL, useValue: 'https://testnet.gateway.proximax.io/'
+                }]
         });
 
 
     });
-
-    it('RemoteTransactionAnnounceService instance should be created',
-        inject([RemoteTransactionAnnounceService], (service: RemoteTransactionAnnounceService) => {
-            expect(service).toBeTruthy();
-        }));
-
-    it('#signTransaction with PLAIN message type should return result',
-        inject([RemoteTransactionAnnounceService], (service: RemoteTransactionAnnounceService) => {
-
-            const data = 'ProximaX is an advanced extension of the Blockchain and Distributed'
-                + 'Ledger Technology (DLT) with utility-rich services and protocols';
-
-            const senderPVKey = 'f7c843068db612ca44f7f7815a11eb1260c614981eefe861e11bc6888cf307d1';
-            const recipientPubKey = '9a4309197988e13ecd2682b4d9f47b802bce0627a174ec5f96c184dfa6db794f';
-            const messageType = MessageType.PLAIN;
-
-            const signTransaction = service.signTransaction(data, senderPVKey, recipientPubKey, messageType);
-            console.log(signTransaction);
-            expect(signTransaction.data.length > 0).toBe(true);
-            expect(signTransaction.signature.length > 0).toBe(true);
-        }));
-
-    it('#announceTransaction with PLAIN message type should return datahash',
-        inject([RemoteTransactionAnnounceService], (service: RemoteTransactionAnnounceService) => {
-
-            const data = Date.now() + ' _ProximaX is an advanced extension of the Blockchain and Distributed'
-                + 'Ledger Technology (DLT) with utility-rich services and protocols';
-
-            const senderPVKey = 'f7c843068db612ca44f7f7815a11eb1260c614981eefe861e11bc6888cf307d1';
-            const recipientPubKey = '9a4309197988e13ecd2682b4d9f47b802bce0627a174ec5f96c184dfa6db794f';
-            const messageType = MessageType.PLAIN;
-
-            const signTransaction = service.signTransaction(data, senderPVKey, recipientPubKey, messageType);
-            console.log(signTransaction);
-            expect(signTransaction.data.length > 0).toBe(true);
-            expect(signTransaction.signature.length > 0).toBe(true);
-
-            service.announceTransaction(signTransaction).subscribe(
-                response => {
-                    console.log(response);
-                    const nr: NemAnnounceResult = response.body;
-                    console.log(nr.transactionHash.data);
-                    expect(response.status).toBe(200);
-                    expect(nr).not.toBe(null);
-                    expect(nr.transactionHash.data.length > 0).toBe(true);
-                }
-            );
-        }));
-
-    it('#announceTransaction with SECURE message type should return datahash',
-        inject([RemoteTransactionAnnounceService], (service: RemoteTransactionAnnounceService) => {
-
-            // tslint:disable-next-line:max-line-length
-            const data = 'GAAAABQAJAAgABwAGAAUABAAAAAIAAQAFAAAACAAAADL7RhGZQEAACQAAAAsAAAARAAAAEgAAAB4AAAACgAAAHRleHQvcGxhaW4AAAQAAAB0ZXN0AAAAABUAAAB7ImF1dGhvciI6IlByb3hpbWF4In0AAAAAAAAAAAAAAC4AAABRbVZ5M3R3SllZUmVHVmRvdUVkNnZpUUh5aFJZa1l6VnBuUEhWZmRMUmVxdlA2AABAAAAAZDJiMDc2OTQ0OWZkOWUxMDdmOGUyNGE3OWZiNmVjMzMyMzQ3MjdlZWEzMjE5M2Q2NDllMTA3ZjMyNzRkNTM1NQAAAAA=';
-
-            const senderPVKey = 'f7c843068db612ca44f7f7815a11eb1260c614981eefe861e11bc6888cf307d1';
-            const recipientPubKey = '9a4309197988e13ecd2682b4d9f47b802bce0627a174ec5f96c184dfa6db794f';
-            const messageType = MessageType.SECURE;
-
-            const signTransaction = service.signTransaction(data, senderPVKey, recipientPubKey, messageType);
-            console.log(signTransaction);
-            expect(signTransaction.data.length > 0).toBe(true);
-            expect(signTransaction.signature.length > 0).toBe(true);
-
-            service.announceTransaction(signTransaction).subscribe(
-                response => {
-                    console.log(response);
-                    const nr: NemAnnounceResult = response.body;
-                    console.log(nr.transactionHash.data);
-                    expect(response.status).toBe(200);
-                    expect(nr).not.toBe(null);
-                    expect(nr.transactionHash.data.length > 0).toBe(true);
-                }
-            );
-        }));
+    /*
+       
+        it('RemoteTransactionAnnounceService instance should be created',
+            inject([RemoteTransactionAnnounceService], (service: RemoteTransactionAnnounceService) => {
+                expect(service).toBeTruthy();
+            }));
+    
+        it('#signTransaction with PLAIN message type should return result',
+            inject([RemoteTransactionAnnounceService], (service: RemoteTransactionAnnounceService) => {
+    
+                const data = 'ProximaX is an advanced extension of the Blockchain and Distributed'
+                    + 'Ledger Technology (DLT) with utility-rich services and protocols';
+    
+                const senderPVKey = 'f7c843068db612ca44f7f7815a11eb1260c614981eefe861e11bc6888cf307d1';
+                const recipientPubKey = '9a4309197988e13ecd2682b4d9f47b802bce0627a174ec5f96c184dfa6db794f';
+                const messageType = MessageType.PLAIN;
+    
+                const signTransaction = service.signTransaction(data, senderPVKey, recipientPubKey, messageType);
+                console.log(signTransaction);
+                expect(signTransaction.data.length > 0).toBe(true);
+                expect(signTransaction.signature.length > 0).toBe(true);
+            }));
+    
+        it('#announceTransaction with PLAIN message type should return datahash',
+            inject([RemoteTransactionAnnounceService], (service: RemoteTransactionAnnounceService) => {
+    
+                const data = Date.now() + ' _ProximaX is an advanced extension of the Blockchain and Distributed'
+                    + 'Ledger Technology (DLT) with utility-rich services and protocols';
+    
+                const senderPVKey = 'f7c843068db612ca44f7f7815a11eb1260c614981eefe861e11bc6888cf307d1';
+                const recipientPubKey = '9a4309197988e13ecd2682b4d9f47b802bce0627a174ec5f96c184dfa6db794f';
+                const messageType = MessageType.PLAIN;
+    
+                const signTransaction = service.signTransaction(data, senderPVKey, recipientPubKey, messageType);
+                console.log(signTransaction);
+                expect(signTransaction.data.length > 0).toBe(true);
+                expect(signTransaction.signature.length > 0).toBe(true);
+    
+                service.announceTransaction(signTransaction).subscribe(
+                    response => {
+                        console.log(response);
+                        const nr: NemAnnounceResult = response.body;
+                        console.log(nr.transactionHash.data);
+                        expect(response.status).toBe(200);
+                        expect(nr).not.toBe(null);
+                        expect(nr.transactionHash.data.length > 0).toBe(true);
+                    }
+                );
+            }));
+    
+        it('#announceTransaction with SECURE message type should return datahash',
+            inject([RemoteTransactionAnnounceService], (service: RemoteTransactionAnnounceService) => {
+    
+                // tslint:disable-next-line:max-line-length
+                const data = 'GAAAABQAJAAgABwAGAAUABAAAAAIAAQAFAAAACAAAADL7RhGZQEAACQAAAAsAAAARAAAAEgAAAB4AAAACgAAAHRleHQvcGxhaW4AAAQAAAB0ZXN0AAAAABUAAAB7ImF1dGhvciI6IlByb3hpbWF4In0AAAAAAAAAAAAAAC4AAABRbVZ5M3R3SllZUmVHVmRvdUVkNnZpUUh5aFJZa1l6VnBuUEhWZmRMUmVxdlA2AABAAAAAZDJiMDc2OTQ0OWZkOWUxMDdmOGUyNGE3OWZiNmVjMzMyMzQ3MjdlZWEzMjE5M2Q2NDllMTA3ZjMyNzRkNTM1NQAAAAA=';
+    
+                const senderPVKey = 'f7c843068db612ca44f7f7815a11eb1260c614981eefe861e11bc6888cf307d1';
+                const recipientPubKey = '9a4309197988e13ecd2682b4d9f47b802bce0627a174ec5f96c184dfa6db794f';
+                const messageType = MessageType.SECURE;
+    
+                const signTransaction = service.signTransaction(data, senderPVKey, recipientPubKey, messageType);
+                console.log(signTransaction);
+                expect(signTransaction.data.length > 0).toBe(true);
+                expect(signTransaction.signature.length > 0).toBe(true);
+    
+                service.announceTransaction(signTransaction).subscribe(
+                    response => {
+                        console.log(response);
+                        const nr: NemAnnounceResult = response.body;
+                        console.log(nr.transactionHash.data);
+                        expect(response.status).toBe(200);
+                        expect(nr).not.toBe(null);
+                        expect(nr.transactionHash.data.length > 0).toBe(true);
+                    }
+                );
+            }));*/
     /*
       it('#announceTransaction should return Datahash',
 
@@ -155,18 +165,44 @@ describe('RemoteTransactionAnnounceServiceTest', () => {
                           expect(txt.data.length > 0).toBe(true);
                       });
               })));
-              */
-    /*
+            
+    */
     it('#getTransaction should be return transaction details',
-        async(inject([RemoteTransactionAnnounceService], (service: RemoteTransactionAnnounceService) => {
-            expect(service).toBeTruthy();
+        async(inject([RemoteDownloadService], (service: RemoteDownloadService) => {
 
-            const nemHash = '526fd05281b39b1dc09466ea70983b0ce41d6114cdc9a9536afbdbb218e0bae8';
-            service.getTransaction(nemHash).subscribe((res) => {
+
+            const nemHash = '419d7b8f2a00e05a64ab84100f2d9a97bb21569b6710b227add8fa80f91abeea';
+            const downloadRequest: DownloadRequest = {
+                hash: '82b691eb118436f9384ff9ff9e81a3438035e4b4ca3f4b7276c5f86199d5e5b2',
+                senderPublicKey: '3be53ccd491d878d7d2a8696ab0a1662ea9644388b81249fccdc921305336190',
+                recipientPrivateKey: 'e104daf06a4a35e9ef1a2d27c95542f184147772d2f624e1034321c33023d2ee', 
+                messageType: MessageType.PLAIN
+            }
+
+            service.download(downloadRequest).subscribe((res) => {
+                // console.log(res);
+
+
                 console.log(res);
-                expect(res.recipient).toBe('TBJMXXPDSP2XUL4N4ABKXNVKQH7OOFZNE4KGYFH4');
+                /*
+                                const strPayload = Converter.hexToStr(payload);
+                
+                                const senderPublicKey = '3be53ccd491d878d7d2a8696ab0a1662ea9644388b81249fccdc921305336190';
+                                const recipientPrivateKey = 'e104daf06a4a35e9ef1a2d27c95542f184147772d2f624e1034321c33023d2ee';
+                
+                                const senderAccount = Account.createWithPublicKey(senderPublicKey);
+                                const recipientAccount = Account.createWithPrivateKey(recipientPrivateKey);
+                
+                                const plainPaylod = Converter.decodeHex(nem.crypto.helpers.decode(recipientPrivateKey,senderPublicKey, payload));
+                                console.log(plainPaylod);
+                                const encryptedMessage =  EncryptedMessage.createFromDTO(payload);
+                                console.log(encryptedMessage);
+                                const plainMessage = recipientAccount.decryptMessage(encryptedMessage, senderAccount);
+                                console.log(plainMessage);
+                                //expect(transaction).not.toBe(null);
+                                */
             });
 
         })));
-        */
+
 });
