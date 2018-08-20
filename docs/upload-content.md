@@ -4,6 +4,8 @@ The following operations allow user to upload text and binary file to the Proxim
 
 By default, the ProximaX gateway is set to [https://testnet2.gateway.proximax.io/](https://testnet2.gateway.proximax.io/swagger-ui.html#/)
 
+NOTE: The upload file size limit is 50 MB
+
 ## Uploading a text
 
 In this section, we will upload the simple text message to the IFPF network and
