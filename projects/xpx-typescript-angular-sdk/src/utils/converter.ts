@@ -10,13 +10,20 @@ export class Converter {
      * @param input the input string
      */
     public static strToArray(input: string) {
-        let bytes = [];
+        const bytes = [];
         for (let i = 0; i < input.length; i++) {
             bytes.push(input.charCodeAt(i));
         }
         return bytes;
     }
 
+     /**
+     * Converts arraybuffer to string
+     * @param input the input arraybuffer
+     */
+    public static ab2str(data: ArrayBuffer): string {
+        return String.fromCharCode.apply(null, new Uint16Array(data));
+    }
 
     /**
     * Convert hex string to Uint8Array
@@ -24,8 +31,8 @@ export class Converter {
     */
     public static hex2ua(hexx: string): Uint8Array {
 
-        let hex = hexx.toString(); //force conversion
-        let ua = new Uint8Array(hex.length / 2);
+        const hex = hexx.toString(); // force conversion
+        const ua = new Uint8Array(hex.length / 2);
         for (let i = 0; i < hex.length; i += 2) {
             ua[i / 2] = parseInt(hex.substr(i, 2), 16);
         }
@@ -39,8 +46,10 @@ export class Converter {
     public static ua2hex(ua: Uint8Array): string {
         let s = '';
         for (let i = 0; i < ua.length; i++) {
-            let code = ua[i];
+            const code = ua[i];
+            // tslint:disable-next-line:no-bitwise
             s += this._hexEncodeArray[code >>> 4];
+            // tslint:disable-next-line:no-bitwise
             s += this._hexEncodeArray[code & 0x0F];
         }
         return s;
@@ -51,10 +60,11 @@ export class Converter {
      * @param input the input hex string
      */
     public static hexToStr(hexx: string): string {
-        let hex = hexx.toString();
+        const hex = hexx.toString();
         let str = '';
-        for (let i = 0; i < hex.length; i += 2)
+        for (let i = 0; i < hex.length; i += 2) {
             str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+        }
         return str;
     }
 
@@ -63,10 +73,10 @@ export class Converter {
      * @param input the input string
      */
     public static utf8ToHex(input: string): string {
-        let rawString = this.rstr2utf8(input);
-        let hex = "";
-        for (var i = 0; i < rawString.length; i++) {
-            hex += this.strlpad(rawString.charCodeAt(i).toString(16), "0", 2)
+        const rawString = this.rstr2utf8(input);
+        let hex = '';
+        for (let i = 0; i < rawString.length; i++) {
+            hex += this.strlpad(rawString.charCodeAt(i).toString(16), '0', 2);
         }
         return hex;
     }
@@ -77,9 +87,9 @@ export class Converter {
      */
     public static encodeHex(message: string): string {
         const rawString = this.rstr2utf8(message);
-        let hex = "";
+        let hex = '';
         for (let i = 0; i < rawString.length; i++) {
-            hex += this.strlpad(rawString.charCodeAt(i).toString(16), "0", 2);
+            hex += this.strlpad(rawString.charCodeAt(i).toString(16), '0', 2);
         }
         return encode(hex);
     }
@@ -89,9 +99,10 @@ export class Converter {
 
      */
     public static decodeHex(hex: string): string {
-        let str = "";
-        for (let i = 0; i < hex.length; i += 2)
+        let str = '';
+        for (let i = 0; i < hex.length; i += 2) {
             str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+        }
         try {
             return decode(str);
         } catch (e) {
@@ -105,19 +116,24 @@ export class Converter {
      * @param input the input string
      */
     public static rstr2utf8(input: string): string {
-        let output = "";
+        let output = '';
 
         for (let n = 0; n < input.length; n++) {
-            let c = input.charCodeAt(n);
+            const c = input.charCodeAt(n);
 
             if (c < 128) {
                 output += String.fromCharCode(c);
             } else if ((c > 127) && (c < 2048)) {
+                // tslint:disable-next-line:no-bitwise
                 output += String.fromCharCode((c >> 6) | 192);
+                // tslint:disable-next-line:no-bitwise
                 output += String.fromCharCode((c & 63) | 128);
             } else {
+                // tslint:disable-next-line:no-bitwise
                 output += String.fromCharCode((c >> 12) | 224);
+                // tslint:disable-next-line:no-bitwise
                 output += String.fromCharCode(((c >> 6) & 63) | 128);
+                // tslint:disable-next-line:no-bitwise
                 output += String.fromCharCode((c & 63) | 128);
             }
         }
@@ -130,7 +146,7 @@ export class Converter {
      * @param input the input utf 8 string
      */
     public static utf82rstrutf82rstr(input: string): string {
-        let output = "", i = 0, c = 0, c1 = 0, c2 = 0, c3 = 0;
+        let output = '', i = 0, c = 0, c2 = 0, c3 = 0;
 
         while (i < input.length) {
             c = input.charCodeAt(i);
@@ -140,11 +156,13 @@ export class Converter {
                 i++;
             } else if ((c > 191) && (c < 224)) {
                 c2 = input.charCodeAt(i + 1);
+                // tslint:disable-next-line:no-bitwise
                 output += String.fromCharCode(((c & 31) << 6) | (c2 & 63));
                 i += 2;
             } else {
                 c2 = input.charCodeAt(i + 1);
                 c3 = input.charCodeAt(i + 2);
+                // tslint:disable-next-line:no-bitwise
                 output += String.fromCharCode(((c & 15) << 12) | ((c2 & 63) << 6) | (c3 & 63));
                 i += 3;
             }
@@ -154,7 +172,7 @@ export class Converter {
     }
 
     /**
-     * 
+     *
      * @param str the input string
      * @param pad the padding
      * @param len the padding length

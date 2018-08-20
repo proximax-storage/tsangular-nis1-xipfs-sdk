@@ -53,6 +53,45 @@ describe('RemoteDownloadServiceTest', () => {
             });
 
         })));
+        /*
+    it('#download should be return download detail',
+        async(inject([RemoteDownloadService], (service: RemoteDownloadService) => {
+
+
+            const nemHash = '419d7b8f2a00e05a64ab84100f2d9a97bb21569b6710b227add8fa80f91abeea';
+            const downloadRequest: DownloadRequest = {
+                hash: '82b691eb118436f9384ff9ff9e81a3438035e4b4ca3f4b7276c5f86199d5e5b2',
+                senderPublicKey: '3be53ccd491d878d7d2a8696ab0a1662ea9644388b81249fccdc921305336190',
+                recipientPrivateKey: 'e104daf06a4a35e9ef1a2d27c95542f184147772d2f624e1034321c33023d2ee',
+                messageType: MessageType.PLAIN
+            }
+
+            service.download(downloadRequest).subscribe((res) => {
+                // console.log(res);
+
+
+                console.log(res);
+
+                                const strPayload = Converter.hexToStr(payload);
+
+                                const senderPublicKey = '3be53ccd491d878d7d2a8696ab0a1662ea9644388b81249fccdc921305336190';
+                                const recipientPrivateKey = 'e104daf06a4a35e9ef1a2d27c95542f184147772d2f624e1034321c33023d2ee';
+
+                                const senderAccount = Account.createWithPublicKey(senderPublicKey);
+                                const recipientAccount = Account.createWithPrivateKey(recipientPrivateKey);
+
+                                // tslint:disable-next-line:max-line-length
+                                const plainPaylod = Converter.decodeHex(nem.crypto.helpers.decode(recipientPrivateKey,senderPublicKey, payload));
+                                console.log(plainPaylod);
+                                const encryptedMessage =  EncryptedMessage.createFromDTO(payload);
+                                console.log(encryptedMessage);
+                                const plainMessage = recipientAccount.decryptMessage(encryptedMessage, senderAccount);
+                                console.log(plainMessage);
+                                //expect(transaction).not.toBe(null);
+
+}); 
+
+        })));*/
     /*
     it('#downloadBinary should download binary file with transfer mode = stream',
         async(inject([RemoteDownloadService], (service: RemoteDownloadService) => {

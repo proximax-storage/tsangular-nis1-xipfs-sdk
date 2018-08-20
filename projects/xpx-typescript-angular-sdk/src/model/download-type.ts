@@ -1,6 +1,3 @@
-import { MessageType } from './message-type';
-import { DownloadType } from './download-type';
-
 /**
  * Copyright 2018 ProximaX Limited
  *
@@ -17,35 +14,10 @@ import { DownloadType } from './download-type';
  * limitations under the License.
  */
 
-/**
- * Interface represents the DownloadRequest
+ /**
+ * DownloadType enumerations
  */
-export interface DownloadRequest {
-
-    /**
-     * The nem datahash
-     */
-    hash?: string;
-
-
-    /**
-     * The recipient private key
-     */
-    recipientPrivateKey?: string;
-
-    /**
-     * The sender public key
-     */
-    senderPublicKey?: string;
-
-    /**
-     * The message type
-     */
-    messageType?: MessageType;
-
-    /**
-     * The download type
-     */
-    downloadType?: DownloadType;
-
+export enum DownloadType {
+    BLOG = 'blob',
+    ARRAYBUFFER = 'arraybuffer'
 }

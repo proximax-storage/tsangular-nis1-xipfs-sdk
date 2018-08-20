@@ -168,3 +168,7 @@ this.uploadService.uploadText(payload).subscribe(response => {
   console.log(nr.transactionHash.data);  
 });
 ```
+
+## What's next ?
+
+[Download your content](download-content.md) from Proximax storage

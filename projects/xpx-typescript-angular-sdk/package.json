@@ -1,7 +1,7 @@
 {
   "name": "xpx-typescript-angular-sdk",
   "description": "Proximax P2P Storage Typescript SDK (NIS1 compatible only)",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/proximax-storage/xpx-typescript-angular-sdk.git"

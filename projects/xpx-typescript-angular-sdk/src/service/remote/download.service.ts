@@ -7,14 +7,15 @@ import { GenericResponseMessage } from '../../model/generic-response-message';
 import { PROXIMAX_REMOTE_BASE_URL, NEM_NETWORK } from '../../model/constants';
 import { DownloadRequest } from '../../model/download-request';
 import { MessageType } from '../../model/message-type';
-import { NetworkTypes, Account, EncryptedMessage } from 'nem-library';
+import { NetworkTypes } from 'nem-library';
 import { RemoteTransactionAnnounceService } from './transaction-announce.service';
-import { switchMap, map } from 'rxjs/operators';
+import { switchMap } from 'rxjs/operators';
 import { Converter } from '../../utils/converter';
 const nem = require('nem-sdk').default;
-import { decode, encode } from 'typescript-base64-arraybuffer';
+import { decode } from 'typescript-base64-arraybuffer';
 import { ResourceHashMessage } from '../../model/resource-hash-message';
 import { flatbuffers } from 'flatbuffers';
+import { DownloadType } from '../../model/download-type';
 /*
 * Copyright 2018 ProximaX Limited
 *
@@ -95,8 +96,8 @@ export class RemoteDownloadService {
             }
         }
 
-      //  const recipientAccount = Account.createWithPrivateKey(payload.recipientPrivateKey);
-      //  const senderAccount = Account.createWithPrivateKey(payload.senderPublicKey);
+        //  const recipientAccount = Account.createWithPrivateKey(payload.recipientPrivateKey);
+        //  const senderAccount = Account.createWithPrivateKey(payload.senderPublicKey);
 
         return this.announceService.getTransactionByNemHash(payload.hash).pipe(
             switchMap(result => {
@@ -111,19 +112,18 @@ export class RemoteDownloadService {
                     base64Message = Converter.decodeHex(resultPayload);
                 }
 
-                //console.log(base64Message);
+                // console.log(base64Message);
                 const decodeData = decode(base64Message);
-                
+
                 // create buffer
                 const dataBuffer = new flatbuffers.ByteBuffer(decodeData);
-                
-                
+
                 // deserialise the data buffer
                 const resourceHash = ResourceHashMessage.getRootAsResourceHashMessage(dataBuffer);
 
-                //console.log(resourceHash);
+                // console.log(resourceHash);
 
-                return this.downloadDirectDatahash(resourceHash.hash());
+                return this.downloadDirectDatahash(resourceHash.hash(), payload.downloadType);
 
             })
         );
@@ -412,16 +412,13 @@ export class RemoteDownloadService {
     * @param  hash the NEM hash
     * @returns  Observable<any>
     */
-    public downloadDirectDatahash(dataHash: string): Observable<any> {
+    public downloadDirectDatahash(dataHash: string, downloadType?: DownloadType): Observable<any> {
         // request endpoint
         const endpoint = this.baseUrl + 'download/direct/datahash';
 
         if (dataHash === null || dataHash === undefined) {
             throw new Error('The hash is required');
         }
-
-        // return response type
-        const responseType = 'blob';
 
         // return full http response
         const observe = 'response';
@@ -440,14 +437,23 @@ export class RemoteDownloadService {
         // }
 
         // console.log(queryParams);
-
-        return this.http.get(path, {
-            responseType: responseType,
-            headers: headers,
-            //    params: queryParams,
-            observe: observe,
-            reportProgress: true
-        });
+        if (downloadType === DownloadType.ARRAYBUFFER) {
+            return this.http.get(path, {
+                responseType: 'arraybuffer',
+                headers: headers,
+                //    params: queryParams,
+                observe: observe,
+                reportProgress: true
+            });
+        } else {
+            return this.http.get(path, {
+                responseType: 'blob',
+                headers: headers,
+                //    params: queryParams,
+                observe: observe,
+                reportProgress: true
+            });
+        }
 
     }
 }

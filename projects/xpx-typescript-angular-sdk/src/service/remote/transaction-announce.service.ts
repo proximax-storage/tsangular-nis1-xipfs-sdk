@@ -111,7 +111,7 @@ export class RemoteTransactionAnnounceService {
     if (recipientAccount === null) {
       throw new Error('Unable to find the recipient account');
     }
-    
+
     const xpxMosaic = new XPX(1 / 10000);
     const message = (messageType === MessageType.SECURE) ? senderAccount.encryptMessage(data, recipientAccount) : PlainMessage.create(data);
 
@@ -165,7 +165,7 @@ export class RemoteTransactionAnnounceService {
    * Get the transaction by nem hash
    * @param nemHash the nem hash
    */
-  public getTransactionByNemHash(nemHash: string):  Observable<any> {
+  public getTransactionByNemHash(nemHash: string): Observable<any> {
 
     if (nemHash === null || nemHash === undefined) {
       throw new Error('The nemhash is required');
@@ -183,11 +183,11 @@ export class RemoteTransactionAnnounceService {
 
         let queryParams = new HttpParams({ encoder: new CustomHttpEncoder() });
         queryParams = queryParams.set('hash', nemHash);
-     
+
         const observe = 'response';
         // console.log(endpoint);
 
-        return this.http.get(endpoint,{
+        return this.http.get(endpoint, {
           headers: headers,
           params: queryParams,
           observe: observe,

@@ -145,3 +145,6 @@ this.uploadService.uploadBinary(payload).subscribe(response => {
   console.log(nr.transactionHash.data);  
 });
 ```
+## What's next ?
+
+Protect your upload content with [privacy strategies](secured-content.md)
