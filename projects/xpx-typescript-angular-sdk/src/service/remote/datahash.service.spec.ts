@@ -30,7 +30,7 @@ describe('RemoteDataHashServiceTest', () => {
         inject([RemoteDataHashService], (service: RemoteDataHashService) => {
             expect(service).toBeTruthy();
         }));
-
+        /*
     it('#generateDatahash should return hash',
         inject([RemoteDataHashService], (service: RemoteDataHashService) => {
             expect(service).toBeTruthy();
@@ -52,5 +52,5 @@ describe('RemoteDataHashServiceTest', () => {
                 expect(err).toBe(null);
             });
 
-        }));
+        }));*/
 });

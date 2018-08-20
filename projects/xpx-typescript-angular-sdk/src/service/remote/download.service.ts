@@ -7,7 +7,7 @@ import { GenericResponseMessage } from '../../model/generic-response-message';
 import { PROXIMAX_REMOTE_BASE_URL, NEM_NETWORK } from '../../model/constants';
 import { DownloadRequest } from '../../model/download-request';
 import { MessageType } from '../../model/message-type';
-import { NetworkTypes } from 'nem-library';
+import { NetworkTypes, TransferTransaction } from 'nem-library';
 import { RemoteTransactionAnnounceService } from './transaction-announce.service';
 import { switchMap } from 'rxjs/operators';
 import { Converter } from '../../utils/converter';
@@ -98,11 +98,11 @@ export class RemoteDownloadService {
 
         //  const recipientAccount = Account.createWithPrivateKey(payload.recipientPrivateKey);
         //  const senderAccount = Account.createWithPrivateKey(payload.senderPublicKey);
-
+     
         return this.announceService.getTransactionByNemHash(payload.hash).pipe(
             switchMap(result => {
                 const resultPayload = result.body.transaction.message.payload;
-
+                console.log('ANNOUNCE Service');
                 let base64Message;
 
                 if (payload.messageType === MessageType.SECURE) {
@@ -415,7 +415,7 @@ export class RemoteDownloadService {
     public downloadDirectDatahash(dataHash: string, downloadType?: DownloadType): Observable<any> {
         // request endpoint
         const endpoint = this.baseUrl + 'download/direct/datahash';
-
+        console.log('Download direct hash');
         if (dataHash === null || dataHash === undefined) {
             throw new Error('The hash is required');
         }

@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AccountMetaDataPair } from '../../model/account-meta-data-pair';
 import { PROXIMAX_REMOTE_BASE_URL } from '../../model/constants';
+import { Transaction } from 'nem-library';
 
 /**
  * Copyright 2018 ProximaX Limited
@@ -75,7 +76,7 @@ export class RemoteAccountService {
             'Accept': 'application/json'
         });
 
-        return this.http.get(path, {
+        return this.http.get<Transaction[]>(path, {
             headers: headers,
             observe: observe,
             reportProgress: true

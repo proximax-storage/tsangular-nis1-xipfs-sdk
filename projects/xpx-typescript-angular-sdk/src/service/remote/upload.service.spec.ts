@@ -6,6 +6,8 @@ import { UploadTextRequest } from '../../model/upload-text-request';
 import { UploadBinaryRequest } from '../../model/upload-binary-request';
 import { ResourceHashMessage } from '../../model/resource-hash-message';
 import { switchMap } from 'rxjs/operators';
+import { MessageType } from '../../model/message-type';
+import { NemAnnounceResult } from 'nem-library';
 
 
 describe('RemoteUploadService', () => {
@@ -38,7 +40,7 @@ describe('RemoteUploadService', () => {
         encoding: 'utf-8',
         name: 'test',
         keywords: '',
-        text: 'Proximax P2P Storage',
+        text: '',
         metadata: '{\'author\':\'ProximaX\'}'
       };
 
@@ -88,7 +90,7 @@ describe('RemoteUploadService', () => {
 
     })));
 
-  it('#uploadText should return IPFS datahash',
+  it('#uploadText should return Nem datahash',
     async(inject([RemoteUploadService], (service: RemoteUploadService) => {
       expect(service).toBeTruthy();
 
@@ -96,28 +98,32 @@ describe('RemoteUploadService', () => {
         'author': 'Proximax'
       };
 
-
       const payload: UploadTextRequest = {
         contentType: 'text/plain',
         encoding: 'utf-8',
         name: 'test',
         keywords: '',
         text: 'Proximax P2P Storage',
-        metadata: JSON.stringify(metadata)
+        metadata: JSON.stringify(metadata),
+        senderPrivateKey: 'e62cccf54864884575a033481cabd4851429203a84849f5fc688fb651efd7f00',
+        recieverPublicKey: '12dffce507f53945b6fcffd600a7500d32c53816fcf8c0c98c6ec7e1e7f8480c',
+        messageType: MessageType.PLAIN
       };
 
       service.uploadText(payload).subscribe((response) => {
-        // console.log(response);
-        const rhm: ResourceHashMessage = response;
-        // console.log(rhm.hash());
-        // IPFS datahash start with Qm
-        expect(rhm.hash().startsWith('Qm')).toBe(true);
+         console.log('Upload Tex ');
+         console.log(response);
+         const result: NemAnnounceResult = response.body;
+         const nemHash = result.transactionHash.data;
+         console.log('Nem hash ' + nemHash);
+        
+         //nem hash
+         expect(nemHash.length>0).toBe(true);
 
-        // expect(dataHash.startsWith('Qm')).toBe(true);
       });
     })));
 
-  it('#uploadBytesBinary should return IPFS datahash',
+  it('#uploadBytesBinary should return Nem datahash',
     async(inject([RemoteUploadService], (service: RemoteUploadService) => {
       expect(service).toBeTruthy();
 
@@ -139,15 +145,19 @@ describe('RemoteUploadService', () => {
         data: byteArray,
         keywords: '',
         metadata: JSON.stringify(metadata),
-        name: 'test'
+        name: 'test',
+        senderPrivateKey: 'e62cccf54864884575a033481cabd4851429203a84849f5fc688fb651efd7f00',
+        recieverPublicKey: '12dffce507f53945b6fcffd600a7500d32c53816fcf8c0c98c6ec7e1e7f8480c',
+        messageType: MessageType.PLAIN
       };
 
       service.uploadBinary(payload).subscribe((response) => {
-        const rhm: ResourceHashMessage = response;
-
-        // IPFS datahash start with Qm
-        console.log(rhm.hash());
-        expect(rhm.hash().startsWith('Qm')).toBe(true);
+        const result: NemAnnounceResult = response.body;
+         const nemHash = result.transactionHash.data;
+         console.log('Nem hash ' + nemHash);
+        
+         //nem hash
+         expect(nemHash.length>0).toBe(true);
       });
     })));
 
@@ -173,10 +183,14 @@ describe('RemoteUploadService', () => {
         name: 'test',
         keywords: '',
         text: 'Proximax P2P Storage',
-        metadata: JSON.stringify(metadata)
+        metadata: JSON.stringify(metadata),
+        senderPrivateKey: 'e62cccf54864884575a033481cabd4851429203a84849f5fc688fb651efd7f00',
+        recieverPublicKey: '12dffce507f53945b6fcffd600a7500d32c53816fcf8c0c98c6ec7e1e7f8480c',
+        messageType: MessageType.PLAIN
+        
       };
 
-      service.uploadText(payload).pipe(
+      service.uploadTextToIFPSOnly(payload).pipe(
         switchMap((data) => {
           const rhm: ResourceHashMessage = data;
           // console.log(rhm);
