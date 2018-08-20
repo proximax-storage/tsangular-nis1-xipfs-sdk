@@ -38,4 +38,5 @@ testem.log
 # System Files
 .DS_Store
 Thumbs.db
+nyc_output
 .nyc_output
