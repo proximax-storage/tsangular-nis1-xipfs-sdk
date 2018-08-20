@@ -167,5 +167,5 @@ export class AppModule { }
 
 - [Encrypt and decrypt content](docs/secured-content.md)
 
-- [Download content](docs/encrypt-decrypt.md)
+- [Download content](docs/download-content.md)
 
