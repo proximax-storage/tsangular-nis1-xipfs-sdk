@@ -53,7 +53,7 @@ You should see the Welcome to `<project-name>` page
 ## 4. Install Proximax typescript SDK and its dependencies
 
 ```bash
-npm install xpx-typescript-angular-sdk crypto-js fast-sha256 flatbuffers nem-library secrets.js-grempe text-encoding-utf-8 typescript-base64-arraybuffer --save
+npm install rxjs rxjs-compat xpx-typescript-angular-sdk crypto-js fast-sha256 flatbuffers nem-library secrets.js-grempe text-encoding-utf-8 typescript-base64-arraybuffer --save
 ```
 
 Note: The new @angular/cli version 6 will break all the 3rd party dependencies that using @Node.js such as nem-sdk and secret.js-grempe. Apply the fix below
