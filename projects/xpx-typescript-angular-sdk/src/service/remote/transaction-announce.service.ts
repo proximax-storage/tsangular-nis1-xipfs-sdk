@@ -6,13 +6,12 @@ import { RemoteNodeService } from './node.service';
 import { PROXIMAX_REMOTE_BASE_URL, NEM_NETWORK } from '../../model/constants';
 import {
   NetworkTypes, NemAnnounceResult,
-  NEMLibrary, Account, TransferTransaction, TimeWindow, PlainMessage, SignedTransaction, Transaction, EncryptedMessage
+  NEMLibrary, Account, TransferTransaction, TimeWindow, PlainMessage, SignedTransaction, MosaicTransferable, MosaicId, MosaicProperties
 } from 'nem-library';
 
 
 
 import { MessageType } from '../../model/message-type';
-import { XPX } from '../../model/XPX';
 import { CustomHttpEncoder } from '../../model/custom-http-encoder';
 
 
@@ -112,14 +111,15 @@ export class RemoteTransactionAnnounceService {
       throw new Error('Unable to find the recipient account');
     }
 
-    const xpxMosaic = new XPX(1 / 10000);
+    // const xpxMosaic = new XPX(1 / 10000);
     const message = (messageType === MessageType.SECURE) ? senderAccount.encryptMessage(data, recipientAccount) : PlainMessage.create(data);
 
     // do not need to attach the XEM mosaic
     const transferTransaction = TransferTransaction.createWithMosaics(
       TimeWindow.createWithDeadline(),
       recipientAccount.address,
-      [xpxMosaic],
+     // [new XPX(1 / 10000)],
+      [new MosaicTransferable(new MosaicId('prx', 'xpx'), new MosaicProperties(), 1 / 10000)],
       message
     );
 
@@ -134,7 +134,7 @@ export class RemoteTransactionAnnounceService {
    * @param payload the SignedTransaction payload
    * @returns Observable<any>
    */
-  public announceTransaction(signedTransaction: SignedTransaction): Observable<any> {
+  public announceTransaction(signedTransaction: SignedTransaction): Observable<string> {
 
     if (signedTransaction === null) {
       throw new Error('The request SignedTransaction payload could not be null');
@@ -156,7 +156,9 @@ export class RemoteTransactionAnnounceService {
           headers: headers,
           observe: observe,
           reportProgress: true
-        });
+        }).pipe(map(response => {
+            return response.body.transactionHash.data;
+        }));
       })
     );
   }

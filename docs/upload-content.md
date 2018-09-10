@@ -56,11 +56,11 @@ const payload: UploadTextRequest = {
 // upload text 
 this.uploadService.uploadText(payload).subscribe(response => {
  
-  const nr: NemAnnounceResult = response.body;
+  const result = response;
 
   // return the datahash from NEM network
   // 1725f6266f70104f2ea4320ccefae6d9cb1683fb0cab4c7e6bf97ece8c7d3bc1
-  console.log(nr.transactionHash.data);  
+  console.log(result);  
 });
 ```
 
@@ -140,11 +140,11 @@ const payload: UploadBinaryRequest = {
 // upload binary file 
 this.uploadService.uploadBinary(payload).subscribe(response => {
  
-  const nr: NemAnnounceResult = response.body;
+  const result = response;
 
   // return the datahash from NEM network
   // 1725f6266f70104f2ea4320ccefae6d9cb1683fb0cab4c7e6bf97ece8c7d3bc1
-  console.log(nr.transactionHash.data);  
+  console.log(result);  
 });
 ```
 ## What's next ?

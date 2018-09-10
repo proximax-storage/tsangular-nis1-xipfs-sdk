@@ -18,7 +18,6 @@ import { RemoteTransactionAnnounceService } from './transaction-announce.service
 import { NetworkTypes, NEMLibrary } from 'nem-library';
 import { Converter } from '../../utils/converter';
 
-
 /**
  * Copyright 2018 ProximaX Limited
  *
@@ -42,7 +41,6 @@ import { Converter } from '../../utils/converter';
   providedIn: 'root'
 })
 export class RemoteUploadService {
-
   // the default baseUrl
   private baseUrl = 'https://testnet2.gateway.proximax.io/';
 
@@ -52,18 +50,24 @@ export class RemoteUploadService {
   private nemNetwork = NetworkTypes.TEST_NET;
 
   /**
-  * The instance of transaction announce service
-  */
+   * The instance of transaction announce service
+   */
   private announceService: RemoteTransactionAnnounceService;
 
-
   /**
-  * RemoteUploadService Constructor
-  * @param http the HttpClient instance
-  * @param baseUrl the optional baseUrl
-  */
-  constructor(private http: HttpClient, @Optional() @Inject(PROXIMAX_REMOTE_BASE_URL) baseUrl: string,
-    @Optional() @Inject(NEM_NETWORK) netNetwork: NetworkTypes) {
+   * RemoteUploadService Constructor
+   * @param http the HttpClient instance
+   * @param baseUrl the optional baseUrl
+   */
+  constructor(
+    private http: HttpClient,
+    @Optional()
+    @Inject(PROXIMAX_REMOTE_BASE_URL)
+    baseUrl: string,
+    @Optional()
+    @Inject(NEM_NETWORK)
+    netNetwork: NetworkTypes
+  ) {
     if (baseUrl) {
       this.baseUrl = baseUrl;
     }
@@ -72,14 +76,16 @@ export class RemoteUploadService {
       this.nemNetwork = netNetwork; // netNetwork.toUpperCase() === 'TEST_NET' ? NetworkTypes.TEST_NET : NetworkTypes.MAIN_NET;
     }
 
-    this.announceService = new RemoteTransactionAnnounceService(this.http, this.baseUrl, this.nemNetwork);
-
+    this.announceService = new RemoteTransactionAnnounceService(
+      this.http,
+      this.baseUrl,
+      this.nemNetwork
+    );
 
     // clean up incase other service initial this NEMLibrary
     // NEMLibrary.reset();
     // NEMLibrary.bootstrap(this.nemNetwork);
   }
-
 
   /**
    * Uploads text to IPFS network
@@ -88,26 +94,35 @@ export class RemoteUploadService {
    *        const rhm: ResourceHashMessage = response;
    *        const ipfsHash = rhm.hash();
    *     });
-   * 
+   *
    * @param payload the upload text request payload
    * @returns Observable<any>
    */
-  private uploadTextToIPFS(payload: UploadTextRequest, returnHash: boolean): Observable<any> {
+  private uploadTextToIPFS(
+    payload: UploadTextRequest,
+    returnHash: boolean
+  ): Observable<any> {
     // request endpoint
     const endpoint = this.baseUrl + 'upload/text';
 
     if (payload === null) {
       throw new Error('The request payload could not be null');
-    } else if (payload.text === null || payload.text === undefined || payload.text === '') {
+    } else if (
+      payload.text === null ||
+      payload.text === undefined ||
+      payload.text === ''
+    ) {
       throw new Error('The request payload \'text\' field is required');
     } else if (!Helpers.isJSONString(payload.metadata)) {
-      throw new Error('The request payload \'metadata\' field must be a valid JSON');
+      throw new Error(
+        'The request payload \'metadata\' field must be a valid JSON'
+      );
     }
 
     // request headers
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
-      'Accept': '*/*'
+      Accept: '*/*'
     });
 
     // request body
@@ -135,30 +150,33 @@ export class RemoteUploadService {
         reportProgress: true
       });
     } else {
-      return this.http.post(endpoint, bodyData, {
-        responseType: responseType,
-        headers: headers,
-        observe: observe,
-        reportProgress: true
-      }).pipe(
-        map((res) => {
+      return this.http
+        .post(endpoint, bodyData, {
+          responseType: responseType,
+          headers: headers,
+          observe: observe,
+          reportProgress: true
+        })
+        .pipe(
+          map(res => {
+            // decode base64 string
+            const data = decode(res.body);
 
-          // decode base64 string
-          const data = decode(res.body);
+            // create buffer
+            const dataBuffer = new flatbuffers.ByteBuffer(data);
 
-          // create buffer
-          const dataBuffer = new flatbuffers.ByteBuffer(data);
+            // deserialise the data buffer
+            const resourceHash = ResourceHashMessage.getRootAsResourceHashMessage(
+              dataBuffer
+            );
 
-          // deserialise the data buffer
-          const resourceHash = ResourceHashMessage.getRootAsResourceHashMessage(dataBuffer);
-
-          // console.log(resourceHash);
-          // return the resource hash from IPFS network
-          return resourceHash;
-        }),
-        catchError(Helpers.handleError));
+            // console.log(resourceHash);
+            // return the resource hash from IPFS network
+            return resourceHash;
+          }),
+          catchError(Helpers.handleError)
+        );
     }
-
   }
 
   /**
@@ -173,11 +191,15 @@ export class RemoteUploadService {
    * @returns Observable<any>
    */
   public uploadText(payload: UploadTextRequest): Observable<any> {
-
     return this.uploadTextToIPFS(payload, false).pipe(
       switchMap(rhm => {
         // console.log(rhm.body);
-        const signTransaction = this.announceService.signTransaction(rhm.body, payload.senderPrivateKey, payload.recieverPublicKey, payload.messageType);
+        const signTransaction = this.announceService.signTransaction(
+          rhm.body,
+          payload.senderPrivateKey,
+          payload.recieverPublicKey,
+          payload.messageType
+        );
         // console.log(signTransaction);
         return this.announceService.announceTransaction(signTransaction);
       })
@@ -203,7 +225,10 @@ export class RemoteUploadService {
    * @param payload the upload binary request payload
    * @returns Observable<any>
    */
-  private uploadBinaryToIPFS(payload: UploadBinaryRequest, returnHash: boolean): Observable<any> {
+  private uploadBinaryToIPFS(
+    payload: UploadBinaryRequest,
+    returnHash: boolean
+  ): Observable<any> {
     // request endpoint
     const endpoint = this.baseUrl + 'upload/bytes/binary';
 
@@ -212,13 +237,15 @@ export class RemoteUploadService {
     } else if (payload.data === null) {
       throw new Error('The request payload \'data\' field is required');
     } else if (!Helpers.isJSONString(payload.metadata)) {
-      throw new Error('The request payload \'metadata\' field must be a valid JSON');
+      throw new Error(
+        'The request payload \'metadata\' field must be a valid JSON'
+      );
     }
 
     // request headers
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
-      'Accept': '*/*'
+      Accept: '*/*'
     });
 
     // request body
@@ -238,31 +265,33 @@ export class RemoteUploadService {
         reportProgress: true
       });
     } else {
-      return this.http.post(endpoint, bodyData, {
-        responseType: responseType,
-        headers: headers,
-        observe: observe,
-        reportProgress: true
-      }).pipe(
-        map((res) => {
-
-          // decode base64 string
-          const data = decode(res.body);
-
-          // create buffer
-          const dataBuffer = new flatbuffers.ByteBuffer(data);
-
-          // deserialise the data buffer
-          const resourceHash = ResourceHashMessage.getRootAsResourceHashMessage(dataBuffer);
-
-          // console.log(resourceHash);
-          // return the resource hash from IPFS network
-          return resourceHash;
+      return this.http
+        .post(endpoint, bodyData, {
+          responseType: responseType,
+          headers: headers,
+          observe: observe,
+          reportProgress: true
         })
-        ,
-        catchError(Helpers.handleError));
-    }
+        .pipe(
+          map(res => {
+            // decode base64 string
+            const data = decode(res.body);
 
+            // create buffer
+            const dataBuffer = new flatbuffers.ByteBuffer(data);
+
+            // deserialise the data buffer
+            const resourceHash = ResourceHashMessage.getRootAsResourceHashMessage(
+              dataBuffer
+            );
+
+            // console.log(resourceHash);
+            // return the resource hash from IPFS network
+            return resourceHash;
+          }),
+          catchError(Helpers.handleError)
+        );
+    }
   }
 
   /**
@@ -277,13 +306,21 @@ export class RemoteUploadService {
    * @returns Observable<any>
    */
   public uploadBinary(payload: UploadBinaryRequest): Observable<any> {
-
-    const trxService = new RemoteTransactionAnnounceService(this.http, this.baseUrl, this.nemNetwork);
+    const trxService = new RemoteTransactionAnnounceService(
+      this.http,
+      this.baseUrl,
+      this.nemNetwork
+    );
 
     return this.uploadBinaryToIPFS(payload, false).pipe(
       switchMap(rhm => {
         // console.log(rhm.body);
-        const signTransaction = trxService.signTransaction(rhm.body, payload.senderPrivateKey, payload.recieverPublicKey, payload.messageType);
+        const signTransaction = trxService.signTransaction(
+          rhm.body,
+          payload.senderPrivateKey,
+          payload.recieverPublicKey,
+          payload.messageType
+        );
         // console.log(signTransaction);
         return trxService.announceTransaction(signTransaction);
       })
@@ -319,13 +356,15 @@ export class RemoteUploadService {
     } else if (payload.data === null) {
       throw new Error('The request payload \'data\' field is required');
     } else if (!Helpers.isJSONString(payload.metadata)) {
-      throw new Error('The request payload \'metadata\' field must be a valid JSON');
+      throw new Error(
+        'The request payload \'metadata\' field must be a valid JSON'
+      );
     }
 
     // request headers
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
-      'Accept': '*/*'
+      Accept: '*/*'
     });
 
     // request body
@@ -337,29 +376,32 @@ export class RemoteUploadService {
     // return full response
     const observe = 'response';
 
-    return this.http.post(endpoint, bodyData, {
-      responseType: responseType,
-      headers: headers,
-      observe: observe,
-      reportProgress: true
-    }).pipe(
-      map((res) => {
-
-        // decode base64 string
-        const data = decode(res.body);
-
-        // create buffer
-        const dataBuffer = new flatbuffers.ByteBuffer(data);
-
-        // deserialise the data buffer
-        const resourceHash = ResourceHashMessage.getRootAsResourceHashMessage(dataBuffer);
-
-        // console.log(resourceHash);
-        // return the resource hash from IPFS network
-        return resourceHash;
+    return this.http
+      .post(endpoint, bodyData, {
+        responseType: responseType,
+        headers: headers,
+        observe: observe,
+        reportProgress: true
       })
-      ,
-      catchError(Helpers.handleError));
+      .pipe(
+        map(res => {
+          // decode base64 string
+          const data = decode(res.body);
+
+          // create buffer
+          const dataBuffer = new flatbuffers.ByteBuffer(data);
+
+          // deserialise the data buffer
+          const resourceHash = ResourceHashMessage.getRootAsResourceHashMessage(
+            dataBuffer
+          );
+
+          // console.log(resourceHash);
+          // return the resource hash from IPFS network
+          return resourceHash;
+        }),
+        catchError(Helpers.handleError)
+      );
   }
 
   /**
@@ -378,16 +420,25 @@ export class RemoteUploadService {
    * @returns Observable<any>
    * @deprecated DO NOT USE - END POINT REMOVED
    */
-  public uploadSignAnnounce(pvkey: string, pubkey: string, messageType: MessageType, payload: UploadBinaryRequest): Observable<any> {
+  public uploadSignAnnounce(
+    pvkey: string,
+    pubkey: string,
+    messageType: MessageType,
+    payload: UploadBinaryRequest
+  ): Observable<any> {
     // request endpoint
     const endpoint = this.baseUrl + 'upload/sign/announce';
 
     if (pvkey === null || pvkey === undefined) {
-      throw new Error('The private key is required for signing and announcing to the network.');
+      throw new Error(
+        'The private key is required for signing and announcing to the network.'
+      );
     }
 
     if (pubkey === null || pubkey === undefined) {
-      throw new Error('The public key is required for signing and announcing to the network.');
+      throw new Error(
+        'The public key is required for signing and announcing to the network.'
+      );
     }
 
     if (messageType === null || messageType === undefined) {
@@ -399,16 +450,18 @@ export class RemoteUploadService {
     } else if (payload.data === null) {
       throw new Error('The request payload \'data\' field is required');
     } else if (!Helpers.isJSONString(payload.metadata)) {
-      throw new Error('The request payload \'metadata\' field must be a valid JSON');
+      throw new Error(
+        'The request payload \'metadata\' field must be a valid JSON'
+      );
     }
 
     // request headers
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
-      'Accept': '*/*',
+      Accept: '*/*',
       'x-pvkey': pvkey,
       'x-pubkey': pubkey,
-      'messageType': messageType
+      messageType: messageType
     });
 
     // request body
@@ -442,17 +495,27 @@ export class RemoteUploadService {
    * @returns Observable<any>
    * @deprecated DO NOT USE - END POINT REMOVED
    */
-  private uploadGenerateSign(pvkey: string, pubkey: string, messageType: MessageType, file: Blob,
-    keywords?: string, metadata?: string): Observable<any> {
+  private uploadGenerateSign(
+    pvkey: string,
+    pubkey: string,
+    messageType: MessageType,
+    file: Blob,
+    keywords?: string,
+    metadata?: string
+  ): Observable<any> {
     // request endpoint
     const endpoint = this.baseUrl + 'upload/generate-sign';
 
     if (pvkey === null || pvkey === undefined) {
-      throw new Error('The private key is required for signing and announcing to the network.');
+      throw new Error(
+        'The private key is required for signing and announcing to the network.'
+      );
     }
 
     if (pubkey === null || pubkey === undefined) {
-      throw new Error('The public key is required for signing and announcing to the network.');
+      throw new Error(
+        'The public key is required for signing and announcing to the network.'
+      );
     }
 
     if (messageType === null || messageType === undefined) {
@@ -468,7 +531,7 @@ export class RemoteUploadService {
       // NOTE: Need to disable the content-type in headerfor multipart/form-data.
       // This is a bug from httpClient that prevent the post method to send the form data
       // 'Content-Type': 'multipart/form-data',
-      'Accept': '*/*',
+      Accept: '*/*',
       'x-pvkey': pvkey,
       'x-pubkey': pubkey
     });
@@ -523,11 +586,13 @@ export class RemoteUploadService {
     // request headers
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
-      'Accept': '*/*'
+      Accept: '*/*'
     });
 
     // add to parameters
-    const queryParams = new HttpParams({ encoder: new CustomHttpEncoder() }).set('multihash', multihash);
+    const queryParams = new HttpParams({
+      encoder: new CustomHttpEncoder()
+    }).set('multihash', multihash);
 
     // return full response
     const observe = 'response';
